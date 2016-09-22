@@ -5,5 +5,5 @@ export interface ValidationError {
     actual: any;
     expected: any;
 }
-export declare function request(compiledPath: CompiledPath | undefined, method: string, query?: any, body?: any): ValidationError[] | undefined;
+export declare function request(compiledPath: CompiledPath | undefined, method: string, query?: any, body?: any, headers?: any): ValidationError[] | undefined;
 export declare function response(compiledPath: CompiledPath | undefined, method: string, status: number, body?: any): ValidationError | undefined;
