@@ -27,7 +27,7 @@ function validate(value, schema) {
     }
     return error;
 }
-function request(compiledPath, method, query, body) {
+function request(compiledPath, method, query, body, headers) {
     if (compiledPath === undefined) {
         return;
     }
@@ -73,6 +73,8 @@ function request(compiledPath, method, query, body) {
                 value = body;
                 bodyDefined = true;
                 break;
+            case 'header':
+                value = (headers || {})[parameter.name];
             default:
         }
         var error = validate(value, parameter);
