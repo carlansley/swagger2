@@ -23,6 +23,7 @@
   "dependencies": {
     "is-my-json-valid": "^2.15.0",
     "json-refs": "^2.1.6",
+    "json-schema-deref": "^0.3.5",
     "json-schema-deref-sync": "^0.3.2",
     "yamljs": "^0.2.8"
   },
