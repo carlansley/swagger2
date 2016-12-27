@@ -722,7 +722,7 @@ describe('document', () => {
   });
 
   describe('validateDocument', () => {
-    it('fail validation on empty object', done => {
+    it('fail validation on empty object', (done) => {
       assert.deepStrictEqual(document.validateDocument({}), undefined);
       done();
     });

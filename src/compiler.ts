@@ -142,11 +142,27 @@ function stringValidator(schema: any) {
 
 export function compile(document: Document): Compiled {
   // add a validator for every parameter in swagger document
-  Object.keys(document.paths).forEach(pathName => {
+  Object.keys(document.paths).forEach((pathName) => {
     let path = document.paths[pathName];
-    Object.keys(path).forEach(operationName => {
+    Object.keys(path).filter((name) => name !== 'parameters').forEach((operationName) => {
       let operation = path[operationName];
-      (operation.parameters || []).forEach((parameter: CompiledParameter) => {
+
+      let parameters: any = {};
+      const resolveParameter = (parameter: any) => {
+        parameters[`${parameter.name}:${parameter.location}`] = parameter;
+      };
+
+      // start with parameters at path level
+      (path.parameters || []).forEach(resolveParameter);
+
+      // merge in or replace parameters from operation level
+      (operation.parameters || []).forEach(resolveParameter);
+
+      // create array of fully resolved parameters for operation
+      operation.resolvedParameters = Object.keys(parameters).map((key) => parameters[key]);
+
+      // create parameter validators
+      operation.resolvedParameters.forEach((parameter: CompiledParameter) => {
         let schema = parameter.schema || parameter;
         if (parameter.in === 'query' || parameter.in === 'header') {
           parameter.validator = stringValidator(schema);
@@ -154,7 +170,8 @@ export function compile(document: Document): Compiled {
           parameter.validator = jsonValidator(schema);
         }
       });
-      Object.keys(operation.responses).forEach(statusCode => {
+
+      Object.keys(operation.responses).forEach((statusCode) => {
         let response = operation.responses[statusCode];
         if (response.schema) {
           response.validator = jsonValidator(response.schema);
@@ -167,19 +184,20 @@ export function compile(document: Document): Compiled {
     });
   });
 
+  let basePath = document.basePath || '';
   let matcher: CompiledPath[] = Object.keys(document.paths)
-    .map(name => {
+    .map((name) => {
       return {
         name,
         path: document.paths[name],
-        regex: new RegExp(document.basePath + name.replace(/\{[^}]*}/g, '[^/]+') + '$'),
-        expected: (name.match(/[^\/]+/g) || []).map(s => s.toString())
+        regex: new RegExp(basePath + name.replace(/\{[^}]*}/g, '[^/]+') + '$'),
+        expected: (name.match(/[^\/]+/g) || []).map((s) => s.toString())
       };
     });
 
   return (path: string) => {
     // get a list of matching paths, there should be only one
-    let matches = matcher.filter(match => !!path.match(match.regex));
+    let matches = matcher.filter((match) => !!path.match(match.regex));
     if (matches.length !== 1) {
       return;
     }

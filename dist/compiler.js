@@ -26,8 +26,8 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
  */
-var jsonValidator = require('is-my-json-valid');
-var deref = require('json-schema-deref-sync');
+var jsonValidator = require("is-my-json-valid");
+var deref = require("json-schema-deref-sync");
 /*
  * We need special handling for query validation, since they're all strings.
  * e.g. we must treat "5" as a valid number
@@ -117,9 +117,20 @@ function compile(document) {
     // add a validator for every parameter in swagger document
     Object.keys(swagger.paths).forEach(function (pathName) {
         var path = swagger.paths[pathName];
-        Object.keys(path).forEach(function (operationName) {
+        Object.keys(path).filter(function (name) { return name !== 'parameters'; }).forEach(function (operationName) {
             var operation = path[operationName];
-            (operation.parameters || []).forEach(function (parameter) {
+            var parameters = {};
+            var resolveParameter = function (parameter) {
+                parameters[parameter.name + ":" + parameter.location] = parameter;
+            };
+            // start with parameters at path level
+            (path.parameters || []).forEach(resolveParameter);
+            // merge in or replace parameters from operation level
+            (operation.parameters || []).forEach(resolveParameter);
+            // create array of fully resolved parameters for operation
+            operation.resolvedParameters = Object.keys(parameters).map(function (key) { return parameters[key]; });
+            // create parameter validators
+            operation.resolvedParameters.forEach(function (parameter) {
                 var schema = parameter.schema || parameter;
                 if (parameter.in === 'query' || parameter.in === 'header') {
                     parameter.validator = stringValidator(schema);
@@ -141,12 +152,13 @@ function compile(document) {
             });
         });
     });
+    var basePath = swagger.basePath || '';
     var matcher = Object.keys(swagger.paths)
         .map(function (name) {
         return {
             name: name,
             path: swagger.paths[name],
-            regex: new RegExp(swagger.basePath + name.replace(/\{[^}]*}/g, '[^/]+') + '$'),
+            regex: new RegExp(basePath + name.replace(/\{[^}]*}/g, '[^/]+') + '$'),
             expected: (name.match(/[^\/]+/g) || []).map(function (s) { return s.toString(); })
         };
     });

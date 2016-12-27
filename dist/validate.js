@@ -4,6 +4,15 @@ function isEmpty(value) {
     return value === undefined || value === '' || Object.keys(value).length === 0;
 }
 function validate(value, schema) {
+    // if no schema, treat as an error
+    if (schema === undefined) {
+        return {
+            actual: value,
+            expected: {
+                schema: undefined
+            },
+        };
+    }
     var valid = schema.validator(value);
     if (valid) {
         return;
@@ -41,11 +50,11 @@ function request(compiledPath, method, query, body, headers) {
         // operation not defined, return 405 (method not allowed)
         return;
     }
-    var parameters = operation.parameters;
+    var parameters = operation.resolvedParameters;
     var validationErrors = [];
     var bodyDefined = false;
     // check all the parameters match swagger schema
-    if (parameters === undefined) {
+    if (parameters.length === 0) {
         var error = validate(body, { validator: isEmpty });
         if (error !== undefined) {
             error.where = 'body';

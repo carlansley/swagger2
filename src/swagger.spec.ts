@@ -27,7 +27,18 @@
 import * as assert from 'assert';
 
 import * as swagger from './swagger';
-import {Compiled} from './swagger';
+
+function compile(fileName: string) {
+  const raw = swagger.loadDocumentSync(fileName);
+  const document: swagger.Document | undefined =  swagger.derefSync( swagger.validateDocument(raw) );
+
+  /* istanbul ignore if */
+  if (document === undefined) {
+    throw Error(`${fileName} failed to compile`);
+  }
+
+  return swagger.compileDocument(document);
+}
 
 describe('swagger2', () => {
   it('has a loadDocumentSync function', () => assert.equal(typeof swagger.loadDocumentSync, 'function'));
@@ -37,15 +48,7 @@ describe('swagger2', () => {
   it('has a compileDocument function', () => assert.equal(typeof swagger.compileDocument, 'function'));
 
   describe('petstore', () => {
-    const raw = swagger.loadDocumentSync(__dirname + '/../test/yaml/petstore.yaml');
-    const document: swagger.Document | undefined = swagger.derefSync( swagger.validateDocument(raw) );
-
-    let compiled: Compiled;
-
-    if (document !== undefined) {
-      // construct a validation object, pre-compiling all schema and regex required
-      compiled = swagger.compileDocument(document);
-    }
+    const compiled = compile('test/yaml/petstore.yaml');
 
     it('invalid paths are undefined', () => {
       assert.equal(undefined, compiled('/v1/bad'));
@@ -366,23 +369,27 @@ describe('swagger2', () => {
           assert.deepStrictEqual(swagger.validateRequest(compiledPath,
             'get', {String: 'hello', SpacedBoolean: 'false abc'}, undefined, {'If-Match': 'XYZ'}), [{
             actual: 'false abc',
-            expected: { type: 'array' },
-            where: 'query' } ]);
+            expected: {type: 'array'},
+            where: 'query'
+          }]);
           assert.deepStrictEqual(swagger.validateRequest(compiledPath,
             'get', {String: 'hello', SpacedBoolean: 'false,true'}, undefined, {'If-Match': 'XYZ'}), [{
             actual: 'false,true',
-            expected: { type: 'array' },
-            where: 'query' } ]);
+            expected: {type: 'array'},
+            where: 'query'
+          }]);
           assert.deepStrictEqual(swagger.validateRequest(compiledPath,
             'get', {String: 'hello', SpacedBoolean: 'false\ttrue'}, undefined, {'If-Match': 'XYZ'}), [{
             actual: 'false\ttrue',
-            expected: { type: 'array' },
-            where: 'query' } ]);
+            expected: {type: 'array'},
+            where: 'query'
+          }]);
           assert.deepStrictEqual(swagger.validateRequest(compiledPath,
             'get', {String: 'hello', SpacedBoolean: 'false|true'}, undefined, {'If-Match': 'XYZ'}), [{
             actual: 'false|true',
-            expected: { type: 'array' },
-            where: 'query' } ]);
+            expected: {type: 'array'},
+            where: 'query'
+          }]);
         });
 
         it('petId must accept an optional tabbed array of booleans in query', () => {
@@ -394,23 +401,27 @@ describe('swagger2', () => {
           assert.deepStrictEqual(swagger.validateRequest(compiledPath,
             'get', {String: 'hello', TabbedBoolean: 'false\tabc'}, undefined, {'If-Match': 'XYZ'}), [{
             actual: 'false\tabc',
-            expected: { type: 'array' },
-            where: 'query' } ]);
+            expected: {type: 'array'},
+            where: 'query'
+          }]);
           assert.deepStrictEqual(swagger.validateRequest(compiledPath,
             'get', {String: 'hello', TabbedBoolean: 'false,true'}, undefined, {'If-Match': 'XYZ'}), [{
             actual: 'false,true',
-            expected: { type: 'array' },
-            where: 'query' } ]);
+            expected: {type: 'array'},
+            where: 'query'
+          }]);
           assert.deepStrictEqual(swagger.validateRequest(compiledPath,
             'get', {String: 'hello', TabbedBoolean: 'false true'}, undefined, {'If-Match': 'XYZ'}), [{
             actual: 'false true',
-            expected: { type: 'array' },
-            where: 'query' } ]);
+            expected: {type: 'array'},
+            where: 'query'
+          }]);
           assert.deepStrictEqual(swagger.validateRequest(compiledPath,
             'get', {String: 'hello', TabbedBoolean: 'false|true'}, undefined, {'If-Match': 'XYZ'}), [{
             actual: 'false|true',
-            expected: { type: 'array' },
-            where: 'query' } ]);
+            expected: {type: 'array'},
+            where: 'query'
+          }]);
         });
 
       });
@@ -430,5 +441,54 @@ describe('swagger2', () => {
   //     });
   //   });
   // });
+
+  describe('parameters.yaml', () => {
+    const compiled = compile('test/yaml/parameters.yaml');
+
+    it('/api/pets', () => {
+      let compiledPath = compiled('/api/pets/abc');
+
+      // not ok
+      assert.deepStrictEqual(swagger.validateRequest(compiledPath, 'get', {
+        Number: 1
+      }), [{
+        actual: undefined,
+        expected: {type: 'string'},
+        where: 'query'
+      }]);
+
+      // ok
+      assert.deepStrictEqual(swagger.validateRequest(compiledPath, 'get', {
+        String: 'hello',
+        Number: 1
+      }), []);
+
+      // not ok
+      assert.deepStrictEqual(swagger.validateRequest(compiledPath, 'put', {
+        String: 'abc'
+      }), [{actual: 'abc', expected: {type: 'number'}, where: 'query'}]);
+
+      // ok
+      assert.deepStrictEqual(swagger.validateRequest(compiledPath, 'put', {String: 123}), []);
+
+    });
+  });
+
+  describe('no-base-path.yaml', () => {
+    const compiled = compile('test/yaml/no-base-path.yaml');
+    it('/pets is resolved correctly with no basePath defined', () => {
+      let compiledPath = compiled('/pets/abc');
+      assert.deepStrictEqual(swagger.validateRequest(compiledPath, 'get'), []);
+    });
+
+    it('/pets verify an error is returned when no response or default response is defined', () => {
+      let compiledPath = compiled('/pets/abc');
+      assert.deepStrictEqual(swagger.validateResponse(compiledPath, 'get', 404), {
+        actual: undefined,
+        expected: {schema: undefined}
+      });
+    });
+
+  });
 
 });

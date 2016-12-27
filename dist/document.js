@@ -26,9 +26,9 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
  */
-var fs = require('fs');
-var jsonValidator = require('is-my-json-valid');
-var YAML = require('yamljs');
+var fs = require("fs");
+var jsonValidator = require("is-my-json-valid");
+var YAML = require("yamljs");
 // build a swagger validator from the official v2.0 schema
 var schemaValidator = jsonValidator(JSON.parse(fs.readFileSync(__dirname + '/schema.json', 'utf8')));
 /*

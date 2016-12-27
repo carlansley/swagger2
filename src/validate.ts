@@ -42,6 +42,17 @@ function isEmpty(value: any) {
 }
 
 function validate(value: any, schema: CompiledDefinition): ValidationError | undefined {
+
+  // if no schema, treat as an error
+  if (schema === undefined) {
+    return {
+      actual: value,
+      expected: {
+        schema: undefined
+      },
+    };
+  }
+
   let valid = schema.validator(value);
   if (valid) {
     return;
@@ -89,12 +100,12 @@ export function request(compiledPath: CompiledPath | undefined,
     return;
   }
 
-  let parameters = operation.parameters;
+  let parameters = operation.resolvedParameters;
   let validationErrors: ValidationError[] = [];
   let bodyDefined = false;
 
   // check all the parameters match swagger schema
-  if (parameters === undefined) {
+  if (parameters.length === 0) {
 
     let error = validate(body, {validator: isEmpty});
     if (error !== undefined) {
@@ -103,7 +114,7 @@ export function request(compiledPath: CompiledPath | undefined,
     }
 
     if (query !== undefined && Object.keys(query).length > 0) {
-      Object.keys(query).forEach(key => {
+      Object.keys(query).forEach((key) => {
         validationErrors.push({
           where: 'query',
           name: key,
