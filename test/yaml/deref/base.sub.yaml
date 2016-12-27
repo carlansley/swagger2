@@ -1,0 +1,3 @@
+name: base-sub
+sub: 
+  $ref: "sub/sub.yaml"

@@ -1,0 +1,5 @@
+name: "base"
+intname: "int"
+ref:
+  name: 
+    $ref: "#/intname"
