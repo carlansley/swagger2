@@ -38,7 +38,7 @@ describe('swagger2', () => {
 
   describe('petstore', () => {
     const raw = swagger.loadDocumentSync(__dirname + '/../test/yaml/petstore.yaml');
-    const document: swagger.Document | undefined = swagger.validateDocument(raw);
+    const document: swagger.Document | undefined = swagger.derefSync( swagger.validateDocument(raw) );
 
     let compiled: Compiled;
 
