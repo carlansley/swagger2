@@ -1,3 +1,5 @@
+// deref.ts
+
 /*
  The MIT License
 
@@ -41,7 +43,8 @@ export interface DerefOptions {
 * custom loader for yml references
 */
 async function ymlLoader( ref: string, option: DerefOptions, fn: any ) {
-  if ( ref.toLowerCase().endsWith('.yml') || ref.toLowerCase().endsWith('.yaml')  ) {
+  const isYamlRegex = /\.y(a|)ml($|#)/i;
+  if ( ref.match(isYamlRegex) ) {
     let yamlRef = YAML.load(path.join(option.baseFolder, ref));
 
     let derefOptions = {
