@@ -36,27 +36,31 @@ export interface DerefOptions {
   cache?: boolean;
   cacheTTL?: number;
   failOnMissing?: boolean;
-  loader?: any; //fn
+  loader?: any;
 }
 
-/*
-* custom loader for yml references
-*/
-async function ymlLoader( ref: string, option: DerefOptions, fn: any ) {
-  const isYamlRegex = /\.y(a|)ml($|#)/i;
-  if ( ref.match(isYamlRegex) ) {
-    let yamlRef = YAML.load(path.join(option.baseFolder, ref));
+/**
+ * custom loader for yml references
+ */
+async function ymlLoader( ref: string, derefOptions: DerefOptions, fn: any ) {
+  const isYamlRegex = /(.*\.y(a|)ml)($|#)/i;
+  const match = ref.match(isYamlRegex);
 
-    let derefOptions = {
-      failOnMissing: option.failOnMissing,
+  if ( match !== null ) {
+    const refFileName = match[1];
+    let yamlRef = YAML.load(path.join(derefOptions.baseFolder, refFileName));
+
+    const optionsOverride = {
       loader: ymlLoader,
-      baseFolder: path.dirname(path.join(option.baseFolder, ref))
+      baseFolder: path.dirname(path.join(derefOptions.baseFolder, refFileName))
     };
 
-    let resolved = await derefp(yamlRef, derefOptions);
-    return fn(null, resolved);
+    const options = Object.assign({}, derefOptions, optionsOverride);
+    let resolved = await derefp(yamlRef, options);
+    fn(null, resolved);
+  } else {
+    fn();
   }
-  return fn();
 }
 
 /*
@@ -86,10 +90,9 @@ export function derefSync(document: any) {
  * async dereffing of input document
  */
 export async function deref(document: any, derefOptions?: DerefOptions ) {
-  let options: DerefOptions = {
+  let optionsOverride: DerefOptions = {
     loader: ymlLoader
   };
-  Object.assign( options, derefOptions );
-
+  const options = Object.assign({}, derefOptions , optionsOverride);
   return await derefp(document, options);
 }
