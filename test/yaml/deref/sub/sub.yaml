@@ -1,0 +1,3 @@
+name: sub-level1
+sub: 
+  $ref: sub/sub2.yaml

@@ -29,7 +29,6 @@
  */
 
 import * as jsonValidator from 'is-my-json-valid';
-import * as deref from 'json-schema-deref-sync';
 
 import {CollectionFormat, Definition, Document, Parameter, PathItem} from './schema';
 
@@ -142,12 +141,9 @@ function stringValidator(schema: any) {
 
 
 export function compile(document: Document): Compiled {
-  // get the de-referenced version of the swagger document
-  let swagger = deref(document);
-
   // add a validator for every parameter in swagger document
-  Object.keys(swagger.paths).forEach((pathName) => {
-    let path = swagger.paths[pathName];
+  Object.keys(document.paths).forEach((pathName) => {
+    let path = document.paths[pathName];
     Object.keys(path).filter((name) => name !== 'parameters').forEach((operationName) => {
       let operation = path[operationName];
 
@@ -188,12 +184,12 @@ export function compile(document: Document): Compiled {
     });
   });
 
-  let basePath = swagger.basePath || '';
-  let matcher: CompiledPath[] = Object.keys(swagger.paths)
+  let basePath = document.basePath || '';
+  let matcher: CompiledPath[] = Object.keys(document.paths)
     .map((name) => {
       return {
         name,
-        path: swagger.paths[name],
+        path: document.paths[name],
         regex: new RegExp(basePath + name.replace(/\{[^}]*}/g, '[^/]+') + '$'),
         expected: (name.match(/[^\/]+/g) || []).map((s) => s.toString())
       };

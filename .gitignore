@@ -5,6 +5,7 @@ pids
 *.seed
 lib-cov
 .idea
+.vscode
 build
 node_modules
 typings

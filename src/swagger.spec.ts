@@ -30,7 +30,7 @@ import * as swagger from './swagger';
 
 function compile(fileName: string) {
   const raw = swagger.loadDocumentSync(fileName);
-  const document: swagger.Document | undefined = swagger.validateDocument(raw);
+  const document: swagger.Document | undefined =  swagger.derefSync( swagger.validateDocument(raw) );
 
   /* istanbul ignore if */
   if (document === undefined) {

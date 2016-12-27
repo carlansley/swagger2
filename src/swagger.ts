@@ -32,6 +32,7 @@
  */
 
 import * as compiler from './compiler';
+import * as ref from './deref';
 import * as document from './document';
 import * as schema from './schema';
 import * as validate from './validate';
@@ -41,6 +42,9 @@ export const validateDocument = document.validateDocument;
 export const validateRequest = validate.request;
 export const validateResponse = validate.response;
 export const compileDocument = compiler.compile;
+
+export const deref = ref.deref;
+export const derefSync = ref.derefSync;
 
 export import Compiled = compiler.Compiled;
 export import Document = schema.Document;
