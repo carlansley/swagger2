@@ -36,6 +36,7 @@ import * as document from './document';
 import * as schema from './schema';
 import * as validate from './validate';
 
+export const loadDocument = document.loadDocument;
 export const loadDocumentSync = document.loadDocumentSync;
 export const validateDocument = document.validateDocument;
 export const validateRequest = validate.request;
