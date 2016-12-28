@@ -67,4 +67,5 @@ export async function loadDocument(file: string): Promise<any> {
       reject(e);
     }
   });
+  return p;
 }
