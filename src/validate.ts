@@ -88,6 +88,7 @@ function validate(value: any, schema: CompiledDefinition): ValidationError | und
 }
 
 export function request(compiledPath: CompiledPath | undefined,
+                        pathParameters: { [name: string]: any },
                         method: string,
                         query?: any,
                         body?: any,
@@ -140,9 +141,7 @@ export function request(compiledPath: CompiledPath | undefined,
         value = (query || {})[parameter.name];
         break;
       case 'path':
-        const actual = compiledPath.name.match(/[^\/]+/g);
-        const valueIndex = compiledPath.expected.indexOf('{' + parameter.name + '}');
-        value = actual ? actual[valueIndex] : undefined;
+        value = (pathParameters || {})[parameter.name];
         break;
       case 'body':
         value = body;
