@@ -45,7 +45,7 @@ function validate(value, schema) {
     }
     return error;
 }
-function request(compiledPath, pathParameters, method, query, body, headers) {
+function request(compiledPath, method, query, body, headers) {
     if (compiledPath === undefined) {
         return;
     }
@@ -84,7 +84,9 @@ function request(compiledPath, pathParameters, method, query, body, headers) {
                 value = (query || {})[parameter.name];
                 break;
             case 'path':
-                value = (pathParameters || {})[parameter.name];
+                var actual = compiledPath.name.match(/[^\/]+/g);
+                var valueIndex = compiledPath.expected.indexOf('{' + parameter.name + '}');
+                value = actual ? actual[valueIndex] : undefined;
                 break;
             case 'body':
                 value = body;
