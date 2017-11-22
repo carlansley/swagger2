@@ -88,11 +88,11 @@ function validate(value: any, schema: CompiledDefinition): ValidationError | und
 }
 
 export function request(compiledPath: CompiledPath | undefined,
-                        pathParameters: { [name: string]: any },
                         method: string,
                         query?: any,
                         body?: any,
-                        headers?: any): ValidationError[] | undefined {
+                        headers?: any,
+                        pathParameters?: { [name: string]: any }): ValidationError[] | undefined {
 
   if (compiledPath === undefined) {
     return;
@@ -141,7 +141,13 @@ export function request(compiledPath: CompiledPath | undefined,
         value = (query || {})[parameter.name];
         break;
       case 'path':
-        value = (pathParameters || {})[parameter.name];
+        if (pathParameters) {
+          value = pathParameters[parameter.name];
+        } else {
+          const actual = compiledPath.name.match(/[^\/]+/g);
+          const valueIndex = compiledPath.expected.indexOf('{' + parameter.name + '}');
+          value = actual ? actual[valueIndex] : undefined;
+        }
         break;
       case 'body':
         value = body;

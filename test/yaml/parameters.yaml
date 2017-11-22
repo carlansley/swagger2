@@ -60,6 +60,27 @@
             description: "A list of pets."
             schema:
               $ref: "#/definitions/Pet"
+    /pets/{breed}/{fur}:
+      parameters:
+        - name: breed
+          in: path
+          required: true
+          description: the type of pet
+          type: string
+        - name: fur
+          in: path
+          required: true
+          description: the type of fur
+          type: string
+      get:
+        description: "Returns a pet by breed and fur type"
+        produces:
+          - "application/json"
+        responses:
+          "200":
+            description: "A pet"
+            schema:
+              $ref: "#/definitions/Pet"
 
   definitions:
     Pet:
