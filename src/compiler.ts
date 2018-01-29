@@ -192,7 +192,7 @@ export function compile(document: Document): Compiled {
       return {
         name,
         path: swagger.paths[name],
-        regex: new RegExp(basePath.replace(/\/*$/, '') + name.replace(/\{[^}]*}/g, '[^/]+') + '/?$'),
+        regex: new RegExp('^' + basePath.replace(/\/*$/, '') + name.replace(/\{[^}]*}/g, '[^/]+') + '/?$'),
         expected: (name.match(/[^\/]+/g) || []).map((s) => s.toString())
       };
     });
