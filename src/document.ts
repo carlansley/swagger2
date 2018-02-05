@@ -28,14 +28,14 @@
  THE SOFTWARE.
  */
 
-import * as fs from 'fs';
 import * as jsonValidator from 'is-my-json-valid';
 import * as YAML from 'yamljs';
 
 import {Document} from './schema';
+import * as schema from './schema.json';
 
 // build a swagger validator from the official v2.0 schema
-const schemaValidator = jsonValidator(JSON.parse(fs.readFileSync(__dirname + '/schema.json', 'utf8')));
+const schemaValidator = jsonValidator(schema);
 
 /*
  * Validate a swagger document against the 2.0 schema, returning a typed Document object.

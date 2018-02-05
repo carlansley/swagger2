@@ -39,3 +39,8 @@ declare module 'json-schema-deref-sync' {
   let x: any;
   export = x;
 }
+
+declare module '*.json' {
+  const value: any;
+  export default value;
+}
