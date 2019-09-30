@@ -48,8 +48,24 @@ export function validateDocument(document: any): Document | undefined {
 }
 
 /*
- * Load a swagger document.  We only support YAML for now.
+ * Load a swagger document synchronous.  We only support YAML for now.
  */
 export function loadDocumentSync(file: string): any {
   return YAML.load(file);
+}
+
+/*
+ * Load a swagger document asynchronous.  We only support YAML for now.
+ */
+export async function loadDocument(file: string): Promise<any> {
+  let p = new Promise( ( resolve, reject ) => {
+    try {
+      YAML.load(file, ( res: any ) => {
+        resolve(res);
+      });
+    } catch (e) {
+      reject(e);
+    }
+  });
+  return p;
 }
