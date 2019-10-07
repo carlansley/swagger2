@@ -20,24 +20,29 @@
   },
   "homepage": "https://github.com/carlansley/swagger2#readme",
   "typings": "./dist/swagger.d.ts",
+  "prettier": "@checkdigit/prettier-config",
   "dependencies": {
     "is-my-json-valid": "^2.20.0",
     "json-schema-deref-sync": "^0.10.1",
     "yamljs": "^0.3.0"
   },
   "devDependencies": {
+    "@checkdigit/eslint-config": "^3.0.1",
+    "@checkdigit/prettier-config": "^1.0.0",
+    "@checkdigit/typescript": "^3.6.2",
+    "@types/is-my-json-valid": "0.0.20",
     "@types/mocha": "^5.2.7",
-    "@types/nock": "^10.0.3",
-    "@types/node": "^12.6.3",
+    "@types/node": "^12.7.11",
     "@types/yamljs": "^0.2.30",
-    "coveralls": "^3.0.5",
+    "coveralls": "^3.0.6",
+    "eslint": "^6.5.1",
     "expectations": "^1.0.0",
-    "istanbul": "^1.1.0-alpha.1",
-    "mocha": "^6.1.4",
-    "nock": "^10.0.6",
-    "remap-istanbul": "^0.13.0",
-    "tslint": "^5.18.0",
-    "typescript": "^3.5.3"
+    "mocha": "^6.2.1",
+    "nock": "^11.4.0",
+    "prettier": "^1.18.2",
+    "nyc": "^14.1.1",
+    "source-map-support": "^0.5.13",
+    "ts-node": "^8.4.1"
   },
   "maintainers": [
     {
@@ -50,15 +55,28 @@
     "version": "npm run dist && git add -A dist",
     "postversion": "git push && git push --tags",
     "build": "rm -rf build && tsc && cp src/schema.json build",
-    "dist": "rm -rf dist && tsc src/typings.d.ts src/swagger.ts -m commonjs --outDir dist --sourcemap --target es2017 --lib es2017 -d --pretty --noImplicitAny && cp src/schema.json dist",
+    "dist": "rm -rf dist && tsc src/swagger.ts -m commonjs --typeRoots ./node_modules/@types,./src/typings --outDir dist --sourcemap --target es2017 --lib es2017 -d --pretty --noImplicitAny --esModuleInterop --resolveJsonModule && cp src/schema.json dist",
     "clean": "rm -rf build && rm -rf coverage && rm -rf node_modules",
-    "lint": "tslint -c ./tslint.json --project ./tsconfig.json",
-    "lint:fix": "npm run lint -- --fix",
-    "test": "npm run build && _mocha --require expectations $(find build -name '*.spec.js') && npm run lint",
-    "cover": "npm run build && npm run cover:istanbul && npm run cover:remap",
-    "cover:browser": "npm run cover && istanbul report html && open coverage/coverage-remapped/index.html",
-    "cover:istanbul": "rm -rf ./coverage && istanbul cover _mocha -- --require expectations $(find build -name '*.spec.js')",
-    "cover:remap": "remap-istanbul -i coverage/coverage.raw.json -o coverage/coverage-remapped.json && remap-istanbul -i coverage/coverage.raw.json -o coverage/coverage-remapped.lcov -t lcovonly && remap-istanbul -i coverage/coverage.raw.json -o coverage/coverage-remapped -t html",
-    "coveralls": "npm run-script cover && coveralls < coverage/coverage-remapped.lcov"
+    "lint": "eslint -f unix src/**/*.ts",
+    "lint:fix": "eslint -f unix src/**/*.ts --fix",
+    "prettier": "prettier --list-different src/**/*.ts",
+    "prettier:fix": "prettier --write src/**/*.ts",
+    "test": "nyc mocha --require ts-node/register --require source-map-support/register --full-trace \"src/**/*.spec.ts\" && npm run lint && npm run prettier",
+    "cover:browser": "nyc report --reporter=html && open coverage/index.html",
+    "coveralls": "nyc report --reporter=text-lcov | coveralls"
+  },
+  "nyc": {
+    "include": [
+      "src/**/*.ts"
+    ],
+    "extension": [
+      ".ts"
+    ],
+    "require": [
+      "ts-node/register"
+    ],
+    "sourceMap": true,
+    "produceSourceMap": true,
+    "instrument": true
   }
 }

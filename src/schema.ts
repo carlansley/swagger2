@@ -1,3 +1,5 @@
+// schema.ts
+
 /*
  * schema.ts
  *
@@ -40,12 +42,23 @@
  THE SOFTWARE.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 export type ParameterType = 'query' | 'path' | 'body' | 'header' | 'formData';
 
 export type DataType = 'array' | 'string' | 'number' | 'integer' | 'boolean';
 
-export type DataFormat = 'uuid' | 'int32' | 'int64' | 'float' | 'double' |
-  'byte' | 'binary' | 'date' | 'date-time' | 'password';
+export type DataFormat =
+  | 'uuid'
+  | 'int32'
+  | 'int64'
+  | 'float'
+  | 'double'
+  | 'byte'
+  | 'binary'
+  | 'date'
+  | 'date-time'
+  | 'password';
 
 export type Schemes = 'http' | 'https' | 'ws' | 'wss';
 
@@ -168,27 +181,27 @@ export interface Document {
  the Swagger-UI for convenience.
  */
 export interface Info {
-  title: string;            // The title of the application.
-  description?: string;     // A short description of the application.
-  termsOfService?: string;  // The Terms of Service for the API.
-  contact?: Contact;        // The contact information for the exposed API.
-  license?: License;        // The license information for the exposed API.
-  version: string;          // Provides the version of the application API.
+  title: string; // The title of the application.
+  description?: string; // A short description of the application.
+  termsOfService?: string; // The Terms of Service for the API.
+  contact?: Contact; // The contact information for the exposed API.
+  license?: License; // The license information for the exposed API.
+  version: string; // Provides the version of the application API.
   [extension: string]: any; // Allows extensions to the Swagger Schema. The field name MUST begin with x-.
 }
 
 // Contact information for the exposed API.
 export interface Contact {
-  name?: string;  // The identifying name of the contact person/organization.
-  url?: string;   // The URL pointing to the contact information. MUST be in the format of a URL.
+  name?: string; // The identifying name of the contact person/organization.
+  url?: string; // The URL pointing to the contact information. MUST be in the format of a URL.
   email?: string; // The email address of the contact person/organization. MUST be in the format of an email address.
   [extension: string]: any; // Allows extensions to the Swagger Schema. The field name MUST begin with x-.
 }
 
 // License information for the exposed API.
 export interface License {
-  name: string;             // The license name used for the API.
-  url?: string;             // A URL to the license used for the API. MUST be in the format of a URL.
+  name: string; // The license name used for the API.
+  url?: string; // A URL to the license used for the API. MUST be in the format of a URL.
   [extension: string]: any; // Allows extensions to the Swagger Schema. The field name MUST begin with x-.
 }
 
@@ -201,7 +214,7 @@ export interface Paths {
    A relative path to an individual endpoint. The field name MUST begin with a slash. The path is appended to the
    basePath in order to construct the full URL. PathItem templating is allowed.
    */
-  [ path: string ]: PathItem | any; // Allows extensions to the Swagger Schema. The field name MUST begin with x-.
+  [path: string]: PathItem | any; // Allows extensions to the Swagger Schema. The field name MUST begin with x-.
 }
 
 /*
@@ -273,18 +286,18 @@ export interface SecurityRequirement {
  Tag Object per tag used there.
  */
 export interface Tag {
-  name: string;                         // The name of the tag.
-  description?: string;                 // A short description for the tag.
+  name: string; // The name of the tag.
+  description?: string; // A short description for the tag.
   externalDocs?: ExternalDocumentation; // Additional external documentation for this tag.
-  [extension: string]: any;             // Allows extensions to the Swagger Schema. The field name MUST begin with x-.
+  [extension: string]: any; // Allows extensions to the Swagger Schema. The field name MUST begin with x-.
 }
 
 /*
  Allows referencing an external resource for extended documentation.
  */
 export interface ExternalDocumentation {
-  description?: string;     // A short description of the target documentation.
-  url: string;              // The URL for the target documentation. Value MUST be in the format of a URL.
+  description?: string; // A short description of the target documentation.
+  url: string; // The URL for the target documentation. Value MUST be in the format of a URL.
   [extension: string]: any; // Allows extensions to the Swagger Schema. The field name MUST begin with x-.
 }
 
@@ -318,6 +331,6 @@ export interface Operation {
   tags?: string[];
   produces?: string[];
   parameters?: Parameter[];
-  responses: { [ statusCode: string ]: Response };
+  responses: { [statusCode: string]: Response };
   security?: any;
 }

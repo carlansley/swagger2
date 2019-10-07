@@ -1,4 +1,4 @@
-// validate.js
+// validate.ts
 
 /*
  * Validate requests and responses in a web framework-neutral way
@@ -28,7 +28,9 @@
  THE SOFTWARE.
  */
 
-import {CompiledDefinition, CompiledPath} from './compiler';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import { CompiledDefinition, CompiledPath } from './compiler';
 
 export interface ValidationError {
   where?: string;
@@ -38,19 +40,20 @@ export interface ValidationError {
   error?: any;
 }
 
+const Undefined = (() => {})();
+
 function isEmpty(value: any) {
-  return value === undefined || value === '' || Object.keys(value).length === 0;
+  return typeof value === 'undefined' || value === '' || Object.keys(value).length === 0;
 }
 
 function validate(value: any, schema: CompiledDefinition): ValidationError | undefined {
-
   // if no schema, treat as an error
-  if (schema === undefined) {
+  if (typeof schema === 'undefined') {
     return {
       actual: value,
       expected: {
-        schema: undefined
-      },
+        schema
+      }
     };
   }
 
@@ -64,44 +67,46 @@ function validate(value: any, schema: CompiledDefinition): ValidationError | und
       schema: schema.schema,
       type: schema.type,
       format: schema.format
-    },
+    }
   };
   const errorDetail = (schema.validator as any).error;
   if (errorDetail) {
     error.error = errorDetail;
   }
 
-  if (error.expected.schema === undefined) {
+  if (typeof error.expected.schema === 'undefined') {
     delete error.expected.schema;
   }
-  if (error.expected.type === undefined) {
+  if (typeof error.expected.type === 'undefined') {
     delete error.expected.type;
   }
-  if (error.expected.format === undefined) {
+  if (typeof error.expected.format === 'undefined') {
     delete error.expected.format;
   }
   if (Object.keys(error.expected).length === 0) {
     // nothing is expected, so set to undefined
-    error.expected = undefined;
+    error.expected = Undefined;
   }
   return error;
 }
 
-export function request(compiledPath: CompiledPath | undefined,
-                        method: string,
-                        query?: any,
-                        body?: any,
-                        headers?: any,
-                        pathParameters?: { [name: string]: any }): ValidationError[] | undefined {
-
-  if (compiledPath === undefined) {
+// eslint-disable-next-line sonarjs/cognitive-complexity
+export function request(
+  compiledPath: CompiledPath | undefined,
+  method: string,
+  query?: any,
+  body?: any,
+  headers?: any,
+  pathParameters?: { [name: string]: any }
+): ValidationError[] | undefined {
+  if (typeof compiledPath === 'undefined') {
     return;
   }
 
   // get operation object for path and method
   const operation = (compiledPath.path as any)[method.toLowerCase()];
 
-  if (operation === undefined) {
+  if (typeof operation === 'undefined') {
     // operation not defined, return 405 (method not allowed)
     return;
   }
@@ -112,15 +117,14 @@ export function request(compiledPath: CompiledPath | undefined,
 
   // check all the parameters match swagger schema
   if (parameters.length === 0) {
-
-    const error = validate(body, {validator: isEmpty});
-    if (error !== undefined) {
+    const error = validate(body, { validator: isEmpty });
+    if (typeof error !== 'undefined') {
       error.where = 'body';
       validationErrors.push(error);
     }
 
-    if (query !== undefined && Object.keys(query).length > 0) {
-      Object.keys(query).forEach((key) => {
+    if (typeof query !== 'undefined' && Object.keys(query).length > 0) {
+      Object.keys(query).forEach(key => {
         validationErrors.push({
           where: 'query',
           name: key,
@@ -134,7 +138,6 @@ export function request(compiledPath: CompiledPath | undefined,
   }
 
   parameters.forEach((parameter: any) => {
-
     let value: any;
     switch (parameter.in) {
       case 'query':
@@ -144,9 +147,10 @@ export function request(compiledPath: CompiledPath | undefined,
         if (pathParameters) {
           value = pathParameters[parameter.name];
         } else {
+          // eslint-disable-next-line require-unicode-regexp,no-useless-escape
           const actual = (compiledPath.requestPath || '').match(/[^\/]+/g);
-          const valueIndex = compiledPath.expected.indexOf('{' + parameter.name + '}');
-          value = actual ? actual[valueIndex] : undefined;
+          const valueIndex = compiledPath.expected.indexOf(`{${parameter.name}}`);
+          value = actual ? actual[valueIndex] : Undefined;
         }
         break;
       case 'body':
@@ -165,16 +169,16 @@ export function request(compiledPath: CompiledPath | undefined,
     }
 
     const error = validate(value, parameter);
-    if (error !== undefined) {
+    if (typeof error !== 'undefined') {
       error.where = parameter.in;
       validationErrors.push(error);
     }
   });
 
   // ensure body is undefined if no body schema is defined
-  if (!bodyDefined && body !== undefined) {
-    const error = validate(body, {validator: isEmpty});
-    if (error !== undefined) {
+  if (!bodyDefined && typeof body !== 'undefined') {
+    const error = validate(body, { validator: isEmpty });
+    if (typeof error !== 'undefined') {
       error.where = 'body';
       validationErrors.push(error);
     }
@@ -183,13 +187,13 @@ export function request(compiledPath: CompiledPath | undefined,
   return validationErrors;
 }
 
-
-export function response(compiledPath: CompiledPath | undefined,
-                         method: string,
-                         status: number,
-                         body?: any): ValidationError | undefined {
-
-  if (compiledPath === undefined) {
+export function response(
+  compiledPath: CompiledPath | undefined,
+  method: string,
+  status: number,
+  body?: any
+): ValidationError | undefined {
+  if (typeof compiledPath === 'undefined') {
     return {
       actual: 'UNDEFINED_PATH',
       expected: 'PATH'
@@ -200,7 +204,7 @@ export function response(compiledPath: CompiledPath | undefined,
 
   // check the response matches the swagger schema
   let schema = operation.responses[status];
-  if (schema === undefined) {
+  if (typeof schema === 'undefined') {
     schema = operation.responses.default;
   }
 

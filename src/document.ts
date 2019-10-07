@@ -28,28 +28,29 @@
  THE SOFTWARE.
  */
 
-import * as jsonValidator from 'is-my-json-valid';
+import jsonValidator from 'is-my-json-valid';
 import * as YAML from 'yamljs';
 
-import {Document} from './schema';
+import { Document } from './schema';
 import * as schema from './schema.json';
 
 // build a swagger validator from the official v2.0 schema
-const schemaValidator = jsonValidator(schema);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const schemaValidator = jsonValidator(schema as any);
 
 /*
  * Validate a swagger document against the 2.0 schema, returning a typed Document object.
  */
-export function validateDocument(document: any): Document | undefined {
+export function validateDocument(document: unknown): Document | undefined {
   if (!schemaValidator(document)) {
     return;
   }
-  return document;
+  return document as Document;
 }
 
 /*
  * Load a swagger document.  We only support YAML for now.
  */
-export function loadDocumentSync(file: string): any {
+export function loadDocumentSync(file: string): unknown {
   return YAML.load(file);
 }

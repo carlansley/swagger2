@@ -36,11 +36,14 @@ import * as document from './document';
 import * as schema from './schema';
 import * as validate from './validate';
 
+// eslint-disable-next-line no-sync
 export const loadDocumentSync = document.loadDocumentSync;
 export const validateDocument = document.validateDocument;
 export const validateRequest = validate.request;
 export const validateResponse = validate.response;
 export const compileDocument = compiler.compile;
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export import Compiled = compiler.Compiled;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export import Document = schema.Document;

@@ -1,4 +1,4 @@
-// compiler.js
+// compiler.ts
 
 /*
  * Convert a swagger document into a compiled form so that it can be used by validator
@@ -28,10 +28,12 @@
  THE SOFTWARE.
  */
 
-import * as jsonValidator from 'is-my-json-valid';
-import * as deref from 'json-schema-deref-sync';
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
-import {CollectionFormat, Definition, Document, Parameter, PathItem} from './schema';
+import jsonValidator from 'is-my-json-valid';
+import deref from 'json-schema-deref-sync';
+
+import { CollectionFormat, Definition, Document, Parameter, PathItem } from './schema';
 
 export type Compiled = (path: string) => CompiledPath | undefined;
 
@@ -51,26 +53,26 @@ export interface CompiledPath {
   requestPath?: string;
 }
 
-
 /*
  * We need special handling for query validation, since they're all strings.
  * e.g. we must treat "5" as a valid number
  */
 function stringValidator(schema: any) {
   const validator = jsonValidator(schema);
-  return (value: any) => {
-
+  return (inputValue: any) => {
     // if an optional field is not provided, we're all good other not so much
-    if (value === undefined) {
+    if (typeof inputValue === 'undefined') {
       return !schema.required;
     }
+
+    let value = inputValue;
 
     switch (schema.type) {
       case 'number':
       case 'integer':
         if (!isNaN(value)) {
           // if the value is a number, make sure it's a number
-          value = +value;
+          value = Number(value);
         }
         break;
 
@@ -110,10 +112,9 @@ function stringValidator(schema: any) {
             value = value.map((num: any) => {
               if (!isNaN(num)) {
                 // if the value is a number, make sure it's a number
-                return +num;
-              } else {
-                return num;
+                return Number(num);
               }
+              return num;
             });
             break;
           case 'boolean':
@@ -122,9 +123,8 @@ function stringValidator(schema: any) {
                 return true;
               } else if (bool === 'false') {
                 return false;
-              } else {
-                return bool;
               }
+              return bool;
             });
             break;
           default:
@@ -133,77 +133,83 @@ function stringValidator(schema: any) {
         break;
 
       default:
-        // leave as-is
+      // leave as-is
     }
     return validator(value);
   };
 }
-
 
 export function compile(document: Document): Compiled {
   // get the de-referenced version of the swagger document
   const swagger = deref(document);
 
   // add a validator for every parameter in swagger document
-  Object.keys(swagger.paths).forEach((pathName) => {
+  Object.keys(swagger.paths).forEach(pathName => {
     const path = swagger.paths[pathName];
-    Object.keys(path).filter((name) => name !== 'parameters').forEach((operationName) => {
-      const operation = path[operationName];
+    Object.keys(path)
+      .filter(name => name !== 'parameters')
+      .forEach(operationName => {
+        const operation = path[operationName];
 
-      const parameters: any = {};
-      const resolveParameter = (parameter: any) => {
-        parameters[`${parameter.name}:${parameter.location}`] = parameter;
-      };
+        const parameters: any = {};
+        const resolveParameter = (parameter: any) => {
+          parameters[`${parameter.name}:${parameter.location}`] = parameter;
+        };
 
-      // start with parameters at path level
-      (path.parameters || []).forEach(resolveParameter);
+        // start with parameters at path level
+        (path.parameters || []).forEach(resolveParameter);
 
-      // merge in or replace parameters from operation level
-      (operation.parameters || []).forEach(resolveParameter);
+        // merge in or replace parameters from operation level
+        (operation.parameters || []).forEach(resolveParameter);
 
-      // create array of fully resolved parameters for operation
-      operation.resolvedParameters = Object.keys(parameters).map((key) => parameters[key]);
+        // create array of fully resolved parameters for operation
+        operation.resolvedParameters = Object.keys(parameters).map(key => parameters[key]);
 
-      // create parameter validators
-      operation.resolvedParameters.forEach((parameter: CompiledParameter) => {
-        const schema = parameter.schema || parameter;
-        if (parameter.in === 'query' || parameter.in === 'header' || parameter.in === 'path') {
-          parameter.validator = stringValidator(schema);
-        } else {
-          parameter.validator = jsonValidator(schema);
-        }
+        // create parameter validators
+        operation.resolvedParameters.forEach((parameter: CompiledParameter) => {
+          const schema = parameter.schema || parameter;
+          if (parameter.in === 'query' || parameter.in === 'header' || parameter.in === 'path') {
+            parameter.validator = stringValidator(schema);
+          } else {
+            parameter.validator = jsonValidator(schema);
+          }
+        });
+
+        Object.keys(operation.responses).forEach(statusCode => {
+          const response = operation.responses[statusCode];
+          if (response.schema) {
+            response.validator = jsonValidator(response.schema);
+          } else {
+            // no schema, so ensure there is no response
+            // tslint:disable-next-line:no-null-keyword
+            response.validator = (body: any) => typeof body === 'undefined' || body === null || body === '';
+          }
+        });
       });
-
-      Object.keys(operation.responses).forEach((statusCode) => {
-        const response = operation.responses[statusCode];
-        if (response.schema) {
-          response.validator = jsonValidator(response.schema);
-        } else {
-          // no schema, so ensure there is no response
-          // tslint:disable-next-line:no-null-keyword
-          response.validator = (body: any) => body === undefined || body === null || body === '';
-        }
-      });
-    });
   });
 
   const basePath = swagger.basePath || '';
-  const matcher: CompiledPath[] = Object.keys(swagger.paths)
-    .map((name) => {
-      return {
-        name,
-        path: swagger.paths[name],
-        regex: new RegExp('^' + basePath.replace(/\/*$/, '') + name.replace(/\{[^}]*}/g, '[^/]+') + '/?$'),
-        expected: (name.match(/[^\/]+/g) || []).map((s) => s.toString())
-      };
-    });
+  const matcher: CompiledPath[] = Object.keys(swagger.paths).map(name => {
+    return {
+      name,
+      path: swagger.paths[name],
+      // eslint-disable-next-line require-unicode-regexp
+      regex: new RegExp(`^${basePath.replace(/\/*$/, '')}${name.replace(/\{[^}]*}/g, '[^/]+')}/?$`),
+      // eslint-disable-next-line no-useless-escape,require-unicode-regexp,id-length
+      expected: (name.match(/[^\/]+/g) || []).map(s => s.toString())
+    };
+  });
 
   return (path: string) => {
     // get a list of matching paths, there should be only one
-    const matches = matcher.filter((match) => !!path.match(match.regex));
+    // eslint-disable-next-line @typescript-eslint/prefer-regexp-exec
+    const matches = matcher.filter(match => Boolean(path.match(match.regex)));
     if (matches.length === 0) {
       return;
     }
-    return {requestPath: path.substring((basePath || '').length), ...matches[0]};
+    return {
+      requestPath: path.substring((basePath || '').length),
+      ...matches[0]
+    };
   };
 }
