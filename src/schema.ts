@@ -162,7 +162,7 @@ export interface Document {
    their order by the parsing tools. Not all tags that are used by the Operation Object must be declared. The tags that
    are not declared may be organized randomly or based on the tools' logic. Each tag name in the list MUST be unique.
    */
-  tags?: Tag;
+  tags?: Tag[];
 
   /*
    Additional external documentation.

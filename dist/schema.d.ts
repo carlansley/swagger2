@@ -17,7 +17,7 @@ export interface Document {
     responses?: ResponsesDefinitions;
     securityDefinitions?: SecurityDefinitions;
     security?: SecurityRequirement;
-    tags?: Tag;
+    tags?: Tag[];
     externalDocs?: ExternalDocumentation;
     [extension: string]: any;
 }
