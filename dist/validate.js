@@ -1,6 +1,8 @@
 "use strict";
 // validate.ts
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.response = exports.request = void 0;
+// eslint-disable-next-line @typescript-eslint/no-empty-function
 const Undefined = (() => { })();
 function isEmpty(value) {
     return typeof value === 'undefined' || value === '' || Object.keys(value).length === 0;
@@ -11,8 +13,8 @@ function validate(value, schema) {
         return {
             actual: value,
             expected: {
-                schema
-            }
+                schema,
+            },
         };
     }
     const valid = schema.validator(value);
@@ -24,8 +26,8 @@ function validate(value, schema) {
         expected: {
             schema: schema.schema,
             type: schema.type,
-            format: schema.format
-        }
+            format: schema.format,
+        },
     };
     const errorDetail = schema.validator.error;
     if (errorDetail) {
@@ -68,12 +70,12 @@ function request(compiledPath, method, query, body, headers, pathParameters) {
             validationErrors.push(error);
         }
         if (typeof query !== 'undefined' && Object.keys(query).length > 0) {
-            Object.keys(query).forEach(key => {
+            Object.keys(query).forEach((key) => {
                 validationErrors.push({
                     where: 'query',
                     name: key,
                     actual: query[key],
-                    expected: {}
+                    expected: {},
                 });
             });
         }
@@ -131,7 +133,7 @@ function response(compiledPath, method, status, body) {
     if (typeof compiledPath === 'undefined') {
         return {
             actual: 'UNDEFINED_PATH',
-            expected: 'PATH'
+            expected: 'PATH',
         };
     }
     const operation = compiledPath.path[method.toLowerCase()];

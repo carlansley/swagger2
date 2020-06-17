@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.compile = void 0;
 /*
  * Convert a swagger document into a compiled form so that it can be used by validator
  */
@@ -119,11 +120,11 @@ function compile(document) {
     // get the de-referenced version of the swagger document
     const swagger = json_schema_deref_sync_1.default(document);
     // add a validator for every parameter in swagger document
-    Object.keys(swagger.paths).forEach(pathName => {
+    Object.keys(swagger.paths).forEach((pathName) => {
         const path = swagger.paths[pathName];
         Object.keys(path)
-            .filter(name => name !== 'parameters')
-            .forEach(operationName => {
+            .filter((name) => name !== 'parameters')
+            .forEach((operationName) => {
             const operation = path[operationName];
             const parameters = {};
             const resolveParameter = (parameter) => {
@@ -134,7 +135,7 @@ function compile(document) {
             // merge in or replace parameters from operation level
             (operation.parameters || []).forEach(resolveParameter);
             // create array of fully resolved parameters for operation
-            operation.resolvedParameters = Object.keys(parameters).map(key => parameters[key]);
+            operation.resolvedParameters = Object.keys(parameters).map((key) => parameters[key]);
             // create parameter validators
             operation.resolvedParameters.forEach((parameter) => {
                 const schema = parameter.schema || parameter;
@@ -145,7 +146,7 @@ function compile(document) {
                     parameter.validator = is_my_json_valid_1.default(schema);
                 }
             });
-            Object.keys(operation.responses).forEach(statusCode => {
+            Object.keys(operation.responses).forEach((statusCode) => {
                 const response = operation.responses[statusCode];
                 if (response.schema) {
                     response.validator = is_my_json_valid_1.default(response.schema);
@@ -159,26 +160,26 @@ function compile(document) {
         });
     });
     const basePath = swagger.basePath || '';
-    const matcher = Object.keys(swagger.paths).map(name => {
+    const matcher = Object.keys(swagger.paths).map((name) => {
         return {
             name,
             path: swagger.paths[name],
             // eslint-disable-next-line require-unicode-regexp
-            regex: new RegExp(`^${basePath.replace(/\/*$/, '')}${name.replace(/\{[^}]*}/g, '[^/]+')}/?$`),
+            regex: new RegExp(`^${basePath.replace(/\/*$/, '')}${name.replace(/{[^}]*}/g, '[^/]+')}/?$`),
             // eslint-disable-next-line no-useless-escape,require-unicode-regexp,id-length
-            expected: (name.match(/[^\/]+/g) || []).map(s => s.toString())
+            expected: (name.match(/[^\/]+/g) || []).map((s) => s.toString()),
         };
     });
     return (path) => {
         // get a list of matching paths, there should be only one
         // eslint-disable-next-line @typescript-eslint/prefer-regexp-exec
-        const matches = matcher.filter(match => Boolean(path.match(match.regex)));
+        const matches = matcher.filter((match) => Boolean(path.match(match.regex)));
         if (matches.length === 0) {
             return;
         }
         return {
             requestPath: path.substring((basePath || '').length),
-            ...matches[0]
+            ...matches[0],
         };
     };
 }
