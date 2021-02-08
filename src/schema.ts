@@ -21,7 +21,7 @@
 /*
  The MIT License
 
- Copyright (c) 2014-2018 Carl Ansley
+ Copyright (c) 2014-2021 Carl Ansley
 
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -42,7 +42,7 @@
  THE SOFTWARE.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any,no-use-before-define */
 
 export type ParameterType = 'query' | 'path' | 'body' | 'header' | 'formData';
 

@@ -10,7 +10,7 @@
 /*
  The MIT License
 
- Copyright (c) 2014-2018 Carl Ansley
+ Copyright (c) 2014-2021 Carl Ansley
 
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -33,7 +33,7 @@
 
 import * as compiler from './compiler';
 import * as document from './document';
-import * as schema from './schema';
+import type * as schema from './schema';
 import * as validate from './validate';
 
 // eslint-disable-next-line no-sync
@@ -43,7 +43,5 @@ export const validateRequest = validate.request;
 export const validateResponse = validate.response;
 export const compileDocument = compiler.compile;
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars,import/order
-export import Compiled = compiler.Compiled;
-// eslint-disable-next-line @typescript-eslint/no-unused-vars,import/order
-export import Document = schema.Document;
+export type Compiled = compiler.Compiled;
+export type Document = schema.Document;
