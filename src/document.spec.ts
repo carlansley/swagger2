@@ -1,11 +1,9 @@
 // document.spec.ts
 
-/* eslint-disable @typescript-eslint/camelcase */
-
 /*
  The MIT License
 
- Copyright (c) 2014-2018 Carl Ansley
+ Copyright (c) 2014-2021 Carl Ansley
 
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the 'Software'), to deal
@@ -26,10 +24,12 @@
  THE SOFTWARE.
  */
 
+/* eslint-disable camelcase */
+
 import * as assert from 'assert';
 
 import * as document from './document';
-import * as schema from './schema';
+import type * as schema from './schema';
 
 /* tslint:disable:max-line-length */
 

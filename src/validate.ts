@@ -7,7 +7,7 @@
 /*
  The MIT License
 
- Copyright (c) 2014-2018 Carl Ansley
+ Copyright (c) 2014-2021 Carl Ansley
 
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -28,9 +28,9 @@
  THE SOFTWARE.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access */
 
-import { CompiledDefinition, CompiledPath } from './compiler';
+import type { CompiledDefinition, CompiledPath } from './compiler';
 
 export interface ValidationError {
   where?: string;
@@ -95,8 +95,11 @@ function validate(value: any, schema: CompiledDefinition): ValidationError | und
 export function request(
   compiledPath: CompiledPath | undefined,
   method: string,
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   query?: any,
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   body?: any,
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   headers?: any,
   pathParameters?: { [name: string]: any }
 ): ValidationError[] | undefined {
@@ -138,6 +141,7 @@ export function request(
     return validationErrors;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   parameters.forEach((parameter: any) => {
     let value: any;
     switch (parameter.in) {
@@ -150,6 +154,7 @@ export function request(
         } else {
           // eslint-disable-next-line require-unicode-regexp,no-useless-escape
           const actual = (compiledPath.requestPath || '').match(/[^\/]+/g);
+          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
           const valueIndex = compiledPath.expected.indexOf(`{${parameter.name}}`);
           value = actual ? actual[valueIndex] : Undefined;
         }
@@ -192,6 +197,7 @@ export function response(
   compiledPath: CompiledPath | undefined,
   method: string,
   status: number,
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   body?: any
 ): ValidationError | undefined {
   if (typeof compiledPath === 'undefined') {

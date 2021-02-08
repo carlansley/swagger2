@@ -7,7 +7,7 @@
 /*
  The MIT License
 
- Copyright (c) 2014-2018 Carl Ansley
+ Copyright (c) 2014-2021 Carl Ansley
 
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -28,10 +28,11 @@
  THE SOFTWARE.
  */
 
+import fs from 'fs';
 import jsonValidator from 'is-my-json-valid';
-import * as YAML from 'yamljs';
+import * as yaml from 'js-yaml';
 
-import { Document } from './schema';
+import type { Document } from './schema';
 import * as schema from './schema.json';
 
 // build a swagger validator from the official v2.0 schema
@@ -52,5 +53,6 @@ export function validateDocument(document: unknown): Document | undefined {
  * Load a swagger document.  We only support YAML for now.
  */
 export function loadDocumentSync(file: string): unknown {
-  return YAML.load(file);
+  // eslint-disable-next-line no-sync
+  return yaml.load(fs.readFileSync(file, 'utf8'));
 }

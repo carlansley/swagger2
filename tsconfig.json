@@ -1,15 +1,12 @@
 {
-  "extends": "@checkdigit/typescript",
+  "extends": "@checkdigit/typescript-config",
   "compilerOptions": {
-    "importsNotUsedAsValues": "remove",
     "rootDir": "src",
-    "outDir": "build",
-    "typeRoots": ["./node_modules/@types", "./typings"]
+    "outDir": "build"
   },
   "exclude": [
     "node_modules",
     "build",
-    "coverage",
     "dist"
   ]
 }

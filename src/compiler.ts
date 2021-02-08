@@ -7,7 +7,7 @@
 /*
  The MIT License
 
- Copyright (c) 2014-2018 Carl Ansley
+ Copyright (c) 2014-2021 Carl Ansley
 
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -28,14 +28,12 @@
  THE SOFTWARE.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-return,@typescript-eslint/restrict-template-expressions */
 
 import jsonValidator from 'is-my-json-valid';
 import deref from 'json-schema-deref-sync';
 
-import { CollectionFormat, Definition, Document, Parameter, PathItem } from './schema';
-
-export type Compiled = (path: string) => CompiledPath | undefined;
+import type { CollectionFormat, Definition, Document, Parameter, PathItem } from './schema';
 
 export interface CompiledDefinition extends Definition {
   validator: (value: any) => boolean;
@@ -52,6 +50,8 @@ export interface CompiledPath {
   expected: string[];
   requestPath?: string;
 }
+
+export type Compiled = (path: string) => CompiledPath | undefined;
 
 /*
  * We need special handling for query validation, since they're all strings.
@@ -189,18 +189,16 @@ export function compile(document: Document): Compiled {
   });
 
   const basePath = swagger.basePath || '';
-  const matcher: CompiledPath[] = Object.keys(swagger.paths).map((name) => {
-    return {
-      name,
-      path: swagger.paths[name],
-      // eslint-disable-next-line require-unicode-regexp
-      regex: new RegExp(`^${basePath.replace(/\/*$/, '')}${name.replace(/{[^}]*}/g, '[^/]+')}/?$`),
-      // eslint-disable-next-line no-useless-escape,require-unicode-regexp,id-length
-      expected: (name.match(/[^\/]+/g) || []).map((s) => s.toString()),
-    };
-  });
+  const matcher: CompiledPath[] = Object.keys(swagger.paths).map((name) => ({
+    name,
+    path: swagger.paths[name],
+    // eslint-disable-next-line require-unicode-regexp
+    regex: new RegExp(`^${basePath.replace(/\/*$/, '')}${name.replace(/{[^}]*}/g, '[^/]+')}/?$`),
+    // eslint-disable-next-line no-useless-escape,require-unicode-regexp,id-length
+    expected: (name.match(/[^\/]+/g) || []).map((s) => s.toString()),
+  }));
 
-  return (path: string) => {
+  return ((path: string) => {
     // get a list of matching paths, there should be only one
     // eslint-disable-next-line @typescript-eslint/prefer-regexp-exec
     const matches = matcher.filter((match) => Boolean(path.match(match.regex)));
@@ -211,5 +209,5 @@ export function compile(document: Document): Compiled {
       requestPath: path.substring((basePath || '').length),
       ...matches[0],
     };
-  };
+  }) as Compiled;
 }
