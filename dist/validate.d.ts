@@ -1,4 +1,4 @@
-import { CompiledPath } from './compiler';
+import type { CompiledPath } from './compiler';
 export interface ValidationError {
     where?: string;
     name?: string;

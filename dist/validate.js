@@ -49,7 +49,13 @@ function validate(value, schema) {
     return error;
 }
 // eslint-disable-next-line sonarjs/cognitive-complexity
-function request(compiledPath, method, query, body, headers, pathParameters) {
+function request(compiledPath, method, 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+query, 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+body, 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+headers, pathParameters) {
     if (typeof compiledPath === 'undefined') {
         return;
     }
@@ -81,6 +87,7 @@ function request(compiledPath, method, query, body, headers, pathParameters) {
         }
         return validationErrors;
     }
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     parameters.forEach((parameter) => {
         let value;
         switch (parameter.in) {
@@ -94,6 +101,7 @@ function request(compiledPath, method, query, body, headers, pathParameters) {
                 else {
                     // eslint-disable-next-line require-unicode-regexp,no-useless-escape
                     const actual = (compiledPath.requestPath || '').match(/[^\/]+/g);
+                    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
                     const valueIndex = compiledPath.expected.indexOf(`{${parameter.name}}`);
                     value = actual ? actual[valueIndex] : Undefined;
                 }
@@ -129,7 +137,9 @@ function request(compiledPath, method, query, body, headers, pathParameters) {
     return validationErrors;
 }
 exports.request = request;
-function response(compiledPath, method, status, body) {
+function response(compiledPath, method, status, 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+body) {
     if (typeof compiledPath === 'undefined') {
         return {
             actual: 'UNDEFINED_PATH',

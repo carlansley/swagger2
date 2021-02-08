@@ -1,5 +1,4 @@
-import { Definition, Document, Parameter, PathItem } from './schema';
-export declare type Compiled = (path: string) => CompiledPath | undefined;
+import type { Definition, Document, Parameter, PathItem } from './schema';
 export interface CompiledDefinition extends Definition {
     validator: (value: any) => boolean;
 }
@@ -13,4 +12,5 @@ export interface CompiledPath {
     expected: string[];
     requestPath?: string;
 }
+export declare type Compiled = (path: string) => CompiledPath | undefined;
 export declare function compile(document: Document): Compiled;

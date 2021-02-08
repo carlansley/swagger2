@@ -11,7 +11,7 @@ exports.compile = void 0;
 /*
  The MIT License
 
- Copyright (c) 2014-2018 Carl Ansley
+ Copyright (c) 2014-2021 Carl Ansley
 
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -31,7 +31,7 @@ exports.compile = void 0;
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
  */
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-return,@typescript-eslint/restrict-template-expressions */
 const is_my_json_valid_1 = __importDefault(require("is-my-json-valid"));
 const json_schema_deref_sync_1 = __importDefault(require("json-schema-deref-sync"));
 /*
@@ -160,17 +160,15 @@ function compile(document) {
         });
     });
     const basePath = swagger.basePath || '';
-    const matcher = Object.keys(swagger.paths).map((name) => {
-        return {
-            name,
-            path: swagger.paths[name],
-            // eslint-disable-next-line require-unicode-regexp
-            regex: new RegExp(`^${basePath.replace(/\/*$/, '')}${name.replace(/{[^}]*}/g, '[^/]+')}/?$`),
-            // eslint-disable-next-line no-useless-escape,require-unicode-regexp,id-length
-            expected: (name.match(/[^\/]+/g) || []).map((s) => s.toString()),
-        };
-    });
-    return (path) => {
+    const matcher = Object.keys(swagger.paths).map((name) => ({
+        name,
+        path: swagger.paths[name],
+        // eslint-disable-next-line require-unicode-regexp
+        regex: new RegExp(`^${basePath.replace(/\/*$/, '')}${name.replace(/{[^}]*}/g, '[^/]+')}/?$`),
+        // eslint-disable-next-line no-useless-escape,require-unicode-regexp,id-length
+        expected: (name.match(/[^\/]+/g) || []).map((s) => s.toString()),
+    }));
+    return ((path) => {
         // get a list of matching paths, there should be only one
         // eslint-disable-next-line @typescript-eslint/prefer-regexp-exec
         const matches = matcher.filter((match) => Boolean(path.match(match.regex)));
@@ -181,7 +179,7 @@ function compile(document) {
             requestPath: path.substring((basePath || '').length),
             ...matches[0],
         };
-    };
+    });
 }
 exports.compile = compile;
 //# sourceMappingURL=compiler.js.map

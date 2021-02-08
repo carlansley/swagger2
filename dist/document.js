@@ -15,7 +15,7 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
     __setModuleDefault(result, mod);
     return result;
 };
@@ -30,7 +30,7 @@ exports.loadDocumentSync = exports.validateDocument = void 0;
 /*
  The MIT License
 
- Copyright (c) 2014-2018 Carl Ansley
+ Copyright (c) 2014-2021 Carl Ansley
 
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -50,8 +50,9 @@ exports.loadDocumentSync = exports.validateDocument = void 0;
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
  */
+const fs_1 = __importDefault(require("fs"));
 const is_my_json_valid_1 = __importDefault(require("is-my-json-valid"));
-const YAML = __importStar(require("yamljs"));
+const yaml = __importStar(require("js-yaml"));
 const schema = __importStar(require("./schema.json"));
 // build a swagger validator from the official v2.0 schema
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -70,7 +71,8 @@ exports.validateDocument = validateDocument;
  * Load a swagger document.  We only support YAML for now.
  */
 function loadDocumentSync(file) {
-    return YAML.load(file);
+    // eslint-disable-next-line no-sync
+    return yaml.load(fs_1.default.readFileSync(file, 'utf8'));
 }
 exports.loadDocumentSync = loadDocumentSync;
 //# sourceMappingURL=document.js.map
