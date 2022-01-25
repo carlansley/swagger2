@@ -105,9 +105,12 @@ export function request(
   method: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   query?: any,
-  body?: unknown,
-  headers?: unknown,
-  pathParameters?: { [name: string]: unknown }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  body?: any,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  headers?: any,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  pathParameters?: { [name: string]: any }
 ): ValidationError[] | undefined {
   if (typeof compiledPath === 'undefined') {
     return;
@@ -165,7 +168,7 @@ export function request(
         break;
       case 'path':
         if (pathParameters) {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
           value = pathParameters[parameter.name];
         } else {
           // eslint-disable-next-line require-unicode-regexp,no-useless-escape
@@ -176,16 +179,17 @@ export function request(
         }
         break;
       case 'body':
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         value = body;
         bodyDefined = true;
         break;
       case 'header':
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-assignment
-        value = ((headers as any) ?? {})[parameter.name];
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+        value = (headers ?? {})[parameter.name];
         break;
       case 'formData':
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-assignment
-        value = ((body as any) ?? {})[parameter.name];
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+        value = (body ?? {})[parameter.name];
         bodyDefined = true;
         break;
       default:
