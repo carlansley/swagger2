@@ -9,4 +9,4 @@ export interface ValidationError {
 export declare function request(compiledPath: CompiledPath | undefined, method: string, query?: any, body?: any, headers?: any, pathParameters?: {
     [name: string]: any;
 }): ValidationError[] | undefined;
-export declare function response(compiledPath: CompiledPath | undefined, method: string, status: number, body?: any): ValidationError | undefined;
+export declare function response(compiledPath: CompiledPath | undefined, method: string, status: number, body?: unknown): ValidationError | undefined;

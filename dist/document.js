@@ -56,7 +56,7 @@ const yaml = __importStar(require("js-yaml"));
 const schema = __importStar(require("./schema.json"));
 // build a swagger validator from the official v2.0 schema
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const schemaValidator = is_my_json_valid_1.default(schema);
+const schemaValidator = (0, is_my_json_valid_1.default)(schema);
 /*
  * Validate a swagger document against the 2.0 schema, returning a typed Document object.
  */
