@@ -28,18 +28,18 @@
  THE SOFTWARE.
  */
 
-/* eslint-disable @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-return,@typescript-eslint/restrict-template-expressions */
-
-import jsonValidator from 'is-my-json-valid';
+import { default as jsonValidator } from 'is-my-json-valid';
 import deref from 'json-schema-deref-sync';
 
 import type { CollectionFormat, Definition, Document, Parameter, PathItem } from './schema';
 
 export interface CompiledDefinition extends Definition {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   validator: (value: any) => boolean;
 }
 
 export interface CompiledParameter extends Parameter {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   validator: (value: any) => boolean;
 }
 
@@ -57,20 +57,21 @@ export type Compiled = (path: string) => CompiledPath | undefined;
  * We need special handling for query validation, since they're all strings.
  * e.g. we must treat "5" as a valid number
  */
-function stringValidator(schema: any) {
-  const validator = jsonValidator(schema);
-  return (inputValue: any) => {
+function stringValidator(schema: Record<string, unknown>) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const validator = jsonValidator(schema as any); // is-my-json-valid doesn't export its types...
+  return (inputValue: unknown) => {
     // if an optional field is not provided, we're all good other not so much
-    if (typeof inputValue === 'undefined') {
-      return !schema.required;
+    if (inputValue === undefined) {
+      return !schema['required'];
     }
 
     let value = inputValue;
 
-    switch (schema.type) {
+    switch (schema['type']) {
       case 'number':
       case 'integer':
-        if (!isNaN(value)) {
+        if (!isNaN(value as number)) {
           // if the value is a number, make sure it's a number
           value = Number(value);
         }
@@ -86,7 +87,8 @@ function stringValidator(schema: any) {
 
       case 'array':
         if (!Array.isArray(value)) {
-          const format: CollectionFormat = schema.collectionFormat || 'csv';
+          const format = schema['collectionFormat'] || ('csv' as CollectionFormat);
+          // eslint-disable-next-line sonarjs/no-nested-switch
           switch (format) {
             case 'csv':
               value = String(value).split(',');
@@ -106,10 +108,11 @@ function stringValidator(schema: any) {
               break;
           }
         }
-        switch (schema.items.type) {
+        // eslint-disable-next-line sonarjs/no-nested-switch
+        switch ((schema['items'] as { type: string }).type) {
           case 'number':
           case 'integer':
-            value = value.map((num: any) => {
+            value = (value as number[]).map((num) => {
               if (!isNaN(num)) {
                 // if the value is a number, make sure it's a number
                 return Number(num);
@@ -118,7 +121,7 @@ function stringValidator(schema: any) {
             });
             break;
           case 'boolean':
-            value = value.map((bool: any) => {
+            value = (value as (boolean | 'true' | 'false')[]).map((bool) => {
               if (bool === 'true') {
                 return true;
               } else if (bool === 'false') {
@@ -141,48 +144,60 @@ function stringValidator(schema: any) {
 
 export function compile(document: Document): Compiled {
   // get the de-referenced version of the swagger document
-  const swagger = deref(document);
+  const swagger = deref(document) as Document;
 
   // add a validator for every parameter in swagger document
   Object.keys(swagger.paths).forEach((pathName) => {
-    const path = swagger.paths[pathName];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const path = swagger.paths[pathName] as Record<string, any>;
     Object.keys(path)
       .filter((name) => name !== 'parameters')
       .forEach((operationName) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const operation = path[operationName];
 
-        const parameters: any = {};
-        const resolveParameter = (parameter: any) => {
+        const parameters: Record<string, unknown> = {};
+        const resolveParameter = (parameter: { name: string; location: string }) => {
           parameters[`${parameter.name}:${parameter.location}`] = parameter;
         };
 
         // start with parameters at path level
-        (path.parameters || []).forEach(resolveParameter);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+        (path['parameters'] ?? []).forEach(resolveParameter);
 
         // merge in or replace parameters from operation level
-        (operation.parameters || []).forEach(resolveParameter);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call
+        (operation?.parameters ?? []).forEach(resolveParameter);
 
         // create array of fully resolved parameters for operation
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         operation.resolvedParameters = Object.keys(parameters).map((key) => parameters[key]);
 
         // create parameter validators
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
         operation.resolvedParameters.forEach((parameter: CompiledParameter) => {
-          const schema = parameter.schema || parameter;
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          const schema = parameter.schema ?? parameter;
           if (parameter.in === 'query' || parameter.in === 'header' || parameter.in === 'path') {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             parameter.validator = stringValidator(schema);
           } else {
             parameter.validator = jsonValidator(schema);
           }
         });
 
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
         Object.keys(operation.responses).forEach((statusCode) => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
           const response = operation.responses[statusCode];
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           if (response.schema) {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             response.validator = jsonValidator(response.schema);
           } else {
             // no schema, so ensure there is no response
-            // tslint:disable-next-line:no-null-keyword
-            response.validator = (body: any) => typeof body === 'undefined' || body === null || body === '';
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            response.validator = (body: unknown) => typeof body === 'undefined' || body === null || body === '';
           }
         });
       });
@@ -191,7 +206,7 @@ export function compile(document: Document): Compiled {
   const basePath = swagger.basePath || '';
   const matcher: CompiledPath[] = Object.keys(swagger.paths).map((name) => ({
     name,
-    path: swagger.paths[name],
+    path: swagger.paths[name] as PathItem,
     // eslint-disable-next-line require-unicode-regexp
     regex: new RegExp(`^${basePath.replace(/\/*$/, '')}${name.replace(/{[^}]*}/g, '[^/]+')}/?$`),
     // eslint-disable-next-line no-useless-escape,require-unicode-regexp,id-length
@@ -200,7 +215,6 @@ export function compile(document: Document): Compiled {
 
   return ((path: string) => {
     // get a list of matching paths, there should be only one
-    // eslint-disable-next-line @typescript-eslint/prefer-regexp-exec
     const matches = matcher.filter((match) => Boolean(path.match(match.regex)));
     if (matches.length === 0) {
       return;

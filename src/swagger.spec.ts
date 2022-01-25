@@ -1114,3 +1114,5 @@ describe('swagger2', () => {
     });
   });
 });
+
+/* eslint-enable no-sync */

@@ -435,7 +435,6 @@ const PETSTORE_SEPARATE_DOCUMENT: schema.Document = {
   },
 };
 
-// noinspection SpellCheckingInspection,ReservedWordAsName
 const PETSTORE_EXPANDED_DOCUMENT: schema.Document = {
   swagger: '2.0',
   info: {
@@ -591,7 +590,6 @@ const PETSTORE_EXPANDED_DOCUMENT: schema.Document = {
   },
 };
 
-// noinspection ReservedWordAsName,SpellCheckingInspection
 const UBER_DOCUMENT: schema.Document = {
   swagger: '2.0',
   info: {
@@ -973,3 +971,5 @@ describe('document', () => {
     // it('succeed validation on petstore-with-external-docs', () => assert.ok(validate(load('petstore-with-external-docs.yaml'))));
   });
 });
+
+/* eslint-enable camelcase */
