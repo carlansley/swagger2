@@ -33,9 +33,12 @@ import type { CompiledDefinition, CompiledPath } from './compiler';
 export interface ValidationError {
   where?: string;
   name?: string;
-  actual: unknown;
-  expected: unknown;
-  error?: unknown;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  actual: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  expected: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  error?: any;
 }
 
 function isEmpty(value: unknown) {
@@ -69,6 +72,7 @@ function validate(value: unknown, schema: CompiledDefinition): ValidationError |
   // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
   const errorDetail = (schema.validator as any).error;
   if (errorDetail) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     error.error = errorDetail;
   }
 
@@ -139,7 +143,7 @@ export function request(
         validationErrors.push({
           where: 'query',
           name: key,
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
           actual: query[key],
           expected: {},
         });
