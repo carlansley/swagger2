@@ -103,11 +103,11 @@ function validate(value: unknown, schema: CompiledDefinition): ValidationError |
 export function request(
   compiledPath: CompiledPath | undefined,
   method: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types
   query?: any,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types
   body?: any,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types
   headers?: any,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   pathParameters?: { [name: string]: any }
@@ -142,7 +142,7 @@ export function request(
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     if (typeof query !== 'undefined' && Object.keys(query).length > 0) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      Object.keys(query).forEach((key) => {
+      for (const key of Object.keys(query)) {
         validationErrors.push({
           where: 'query',
           name: key,
@@ -150,13 +150,13 @@ export function request(
           actual: query[key],
           expected: {},
         });
-      });
+      }
     }
 
     return validationErrors;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-explicit-any,unicorn/no-array-for-each
   parameters.forEach((parameter: any) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let value: any;
@@ -171,8 +171,8 @@ export function request(
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
           value = pathParameters[parameter.name];
         } else {
-          // eslint-disable-next-line require-unicode-regexp,no-useless-escape
-          const actual = (compiledPath.requestPath || '').match(/[^\/]+/g);
+          // eslint-disable-next-line require-unicode-regexp
+          const actual = (compiledPath.requestPath || '').match(/[^/]+/g);
           // eslint-disable-next-line @typescript-eslint/restrict-template-expressions,@typescript-eslint/no-unsafe-member-access
           const valueIndex = compiledPath.expected.indexOf(`{${parameter.name}}`);
           value = actual ? actual[valueIndex] : undefined;

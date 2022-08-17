@@ -71,7 +71,7 @@ function stringValidator(schema: Record<string, unknown>) {
     switch (schema['type']) {
       case 'number':
       case 'integer':
-        if (!isNaN(value as number)) {
+        if (!Number.isNaN(value as number)) {
           // if the value is a number, make sure it's a number
           value = Number(value);
         }
@@ -112,12 +112,12 @@ function stringValidator(schema: Record<string, unknown>) {
         switch ((schema['items'] as { type: string }).type) {
           case 'number':
           case 'integer':
-            value = (value as number[]).map((num) => {
-              if (!isNaN(num)) {
+            value = (value as number[]).map((number_) => {
+              if (!Number.isNaN(number_)) {
                 // if the value is a number, make sure it's a number
-                return Number(num);
+                return Number(number_);
               }
-              return num;
+              return number_;
             });
             break;
           case 'boolean':
@@ -142,66 +142,66 @@ function stringValidator(schema: Record<string, unknown>) {
   };
 }
 
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export function compile(document: Document): Compiled {
   // get the de-referenced version of the swagger document
   const swagger = deref(document) as Document;
 
   // add a validator for every parameter in swagger document
-  Object.keys(swagger.paths).forEach((pathName) => {
+  for (const pathName of Object.keys(swagger.paths)) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const path = swagger.paths[pathName] as Record<string, any>;
-    Object.keys(path)
-      .filter((name) => name !== 'parameters')
-      .forEach((operationName) => {
+    for (const operationName of Object.keys(path).filter((name) => name !== 'parameters')) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const operation = path[operationName];
+
+      const parameters: Record<string, unknown> = {};
+      // eslint-disable-next-line unicorn/consistent-function-scoping
+      const resolveParameter = (parameter: { name: string; location: string }) => {
+        parameters[`${parameter.name}:${parameter.location}`] = parameter;
+      };
+
+      // start with parameters at path level
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,unicorn/no-array-for-each
+      (path['parameters'] ?? []).forEach(resolveParameter);
+
+      // merge in or replace parameters from operation level
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call,unicorn/no-array-for-each
+      (operation?.parameters ?? []).forEach(resolveParameter);
+
+      // create array of fully resolved parameters for operation
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      operation.resolvedParameters = Object.keys(parameters).map((key) => parameters[key]);
+
+      // create parameter validators
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,unicorn/no-array-for-each
+      operation.resolvedParameters.forEach((parameter: CompiledParameter) => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        const operation = path[operationName];
-
-        const parameters: Record<string, unknown> = {};
-        const resolveParameter = (parameter: { name: string; location: string }) => {
-          parameters[`${parameter.name}:${parameter.location}`] = parameter;
-        };
-
-        // start with parameters at path level
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-        (path['parameters'] ?? []).forEach(resolveParameter);
-
-        // merge in or replace parameters from operation level
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call
-        (operation?.parameters ?? []).forEach(resolveParameter);
-
-        // create array of fully resolved parameters for operation
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        operation.resolvedParameters = Object.keys(parameters).map((key) => parameters[key]);
-
-        // create parameter validators
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-        operation.resolvedParameters.forEach((parameter: CompiledParameter) => {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          const schema = parameter.schema ?? parameter;
-          if (parameter.in === 'query' || parameter.in === 'header' || parameter.in === 'path') {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-            parameter.validator = stringValidator(schema);
-          } else {
-            parameter.validator = jsonValidator(schema);
-          }
-        });
-
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
-        Object.keys(operation.responses).forEach((statusCode) => {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
-          const response = operation.responses[statusCode];
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          if (response.schema) {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            response.validator = jsonValidator(response.schema);
-          } else {
-            // no schema, so ensure there is no response
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            response.validator = (body: unknown) => typeof body === 'undefined' || body === null || body === '';
-          }
-        });
+        const schema = parameter.schema ?? parameter;
+        if (parameter.in === 'query' || parameter.in === 'header' || parameter.in === 'path') {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+          parameter.validator = stringValidator(schema);
+        } else {
+          parameter.validator = jsonValidator(schema);
+        }
       });
-  });
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
+      for (const statusCode of Object.keys(operation.responses)) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
+        const response = operation.responses[statusCode];
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        if (response.schema) {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          response.validator = jsonValidator(response.schema);
+        } else {
+          // no schema, so ensure there is no response
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          response.validator = (body: unknown) => typeof body === 'undefined' || body === null || body === '';
+        }
+      }
+    }
+  }
 
   const basePath = swagger.basePath || '';
   const matcher: CompiledPath[] = Object.keys(swagger.paths).map((name) => ({
@@ -209,18 +209,18 @@ export function compile(document: Document): Compiled {
     path: swagger.paths[name] as PathItem,
     // eslint-disable-next-line require-unicode-regexp
     regex: new RegExp(`^${basePath.replace(/\/*$/, '')}${name.replace(/{[^}]*}/g, '[^/]+')}/?$`),
-    // eslint-disable-next-line no-useless-escape,require-unicode-regexp,id-length
-    expected: (name.match(/[^\/]+/g) || []).map((s) => s.toString()),
+    // eslint-disable-next-line require-unicode-regexp,id-length
+    expected: (name.match(/[^/]+/g) || []).map((s) => s.toString()),
   }));
 
   return ((path: string) => {
     // get a list of matching paths, there should be only one
-    const matches = matcher.filter((match) => Boolean(path.match(match.regex)));
+    const matches = matcher.filter((match) => Boolean(match.regex.test(path)));
     if (matches.length === 0) {
       return;
     }
     return {
-      requestPath: path.substring((basePath || '').length),
+      requestPath: path.slice((basePath || '').length),
       ...matches[0],
     };
   }) as Compiled;

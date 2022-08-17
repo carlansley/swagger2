@@ -24,7 +24,7 @@
  THE SOFTWARE.
  */
 
-import * as assert from 'assert';
+import * as assert from 'node:assert';
 
 import * as swagger from './swagger';
 
@@ -36,7 +36,7 @@ function compile(fileName: string) {
 
   /* istanbul ignore if */
   if (document === undefined) {
-    throw Error(`${fileName} failed to compile`);
+    throw new Error(`${fileName} failed to compile`);
   }
 
   return swagger.compileDocument(document);

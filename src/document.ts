@@ -28,7 +28,7 @@
  THE SOFTWARE.
  */
 
-import fs from 'fs';
+import fs from 'node:fs';
 import jsonValidator from 'is-my-json-valid';
 import * as yaml from 'js-yaml';
 

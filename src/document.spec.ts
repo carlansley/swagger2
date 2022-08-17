@@ -26,7 +26,7 @@
 
 /* eslint-disable camelcase */
 
-import * as assert from 'assert';
+import * as assert from 'node:assert';
 
 import * as document from './document';
 import type * as schema from './schema';
@@ -925,6 +925,7 @@ const UBER_DOCUMENT: schema.Document = {
   },
 };
 
+// eslint-disable-next-line unicorn/prefer-module
 const TEST_YAML_DIR = `${__dirname}/../test/yaml/`;
 
 function load(name: string) {
