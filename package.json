@@ -49,6 +49,7 @@
     "preset": "ts-jest",
     "collectCoverageFrom": [
       "<rootDir>/src/**",
+      "!<rootDir>/src/**/*.json",
       "!<rootDir>/src/**/*.spec.ts",
       "!<rootDir>/src/**/*.test.ts"
     ],
