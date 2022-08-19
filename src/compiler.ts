@@ -87,7 +87,7 @@ function stringValidator(schema: Record<string, unknown>) {
 
       case 'array':
         if (!Array.isArray(value)) {
-          const format = schema['collectionFormat'] || ('csv' as CollectionFormat);
+          const format = schema['collectionFormat'] ?? ('csv' as CollectionFormat);
           // eslint-disable-next-line sonarjs/no-nested-switch
           switch (format) {
             case 'csv':
@@ -203,14 +203,14 @@ export function compile(document: Document): Compiled {
     }
   }
 
-  const basePath = swagger.basePath || '';
+  const basePath = swagger.basePath ?? '';
   const matcher: CompiledPath[] = Object.keys(swagger.paths).map((name) => ({
     name,
     path: swagger.paths[name] as PathItem,
     // eslint-disable-next-line require-unicode-regexp
     regex: new RegExp(`^${basePath.replace(/\/*$/, '')}${name.replace(/{[^}]*}/g, '[^/]+')}/?$`),
     // eslint-disable-next-line require-unicode-regexp,id-length
-    expected: (name.match(/[^/]+/g) || []).map((s) => s.toString()),
+    expected: (name.match(/[^/]+/g) ?? []).map((s) => s.toString()),
   }));
 
   return ((path: string) => {
@@ -220,7 +220,7 @@ export function compile(document: Document): Compiled {
       return;
     }
     return {
-      requestPath: path.slice((basePath || '').length),
+      requestPath: path.slice(basePath.length),
       ...matches[0],
     };
   }) as Compiled;

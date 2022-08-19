@@ -172,7 +172,7 @@ export function request(
           value = pathParameters[parameter.name];
         } else {
           // eslint-disable-next-line require-unicode-regexp
-          const actual = (compiledPath.requestPath || '').match(/[^/]+/g);
+          const actual = (compiledPath.requestPath ?? '').match(/[^/]+/g);
           // eslint-disable-next-line @typescript-eslint/restrict-template-expressions,@typescript-eslint/no-unsafe-member-access
           const valueIndex = compiledPath.expected.indexOf(`{${parameter.name}}`);
           value = actual ? actual[valueIndex] : undefined;
