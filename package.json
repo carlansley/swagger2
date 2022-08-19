@@ -1,6 +1,6 @@
 {
   "name": "swagger2",
-  "version": "4.0.1",
+  "version": "4.0.2",
   "description": "Typescript-based tools for working with Swagger v2.0 documents",
   "main": "dist/swagger.js",
   "repository": {
@@ -65,7 +65,7 @@
     ]
   },
   "scripts": {
-    "dist": "rimraf dist && tsc src/swagger.ts -m commonjs --typeRoots ./node_modules/@types,./typings --outDir dist --sourcemap --target es2022 --lib es2022 -d --pretty --noImplicitAny --esModuleInterop --resolveJsonModule && cp src/schema.json dist",
+    "dist": "rimraf dist && tsc --outDir dist && rimraf dist/*.spec.* && cp src/schema.json dist",
     "prepublishOnly": "npm run dist && rimraf .github src test typings .eslintrc .gitignore tsconfig.json",
     "lint": "eslint -f unix src/**/*.ts",
     "lint:fix": "eslint -f unix src/**/*.ts --fix",
