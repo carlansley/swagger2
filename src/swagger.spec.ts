@@ -3,7 +3,7 @@
 /*
  The MIT License
 
- Copyright (c) 2014-2021 Carl Ansley
+ Copyright (c) 2014-2022 Carl Ansley
 
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +24,7 @@
  THE SOFTWARE.
  */
 
-import * as assert from 'assert';
+import * as assert from 'node:assert';
 
 import * as swagger from './swagger';
 
@@ -36,7 +36,7 @@ function compile(fileName: string) {
 
   /* istanbul ignore if */
   if (document === undefined) {
-    throw Error(`${fileName} failed to compile`);
+    throw new Error(`${fileName} failed to compile`);
   }
 
   return swagger.compileDocument(document);

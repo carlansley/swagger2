@@ -1,8 +1,3 @@
-[![Build Status](https://travis-ci.org/carlansley/swagger2.svg?branch=master)](https://travis-ci.org/carlansley/swagger2)
-[![Coverage Status](https://coveralls.io/repos/github/carlansley/swagger2/badge.svg?branch=master)](https://coveralls.io/github/carlansley/swagger2?branch=master)
-[![Dependencies](https://david-dm.org/carlansley/swagger2.svg)](https://raw.githubusercontent.com/carlansley/swagger2/master/package.json)
-[![Known Vulnerabilities](https://snyk.io/test/github/carlansley/swagger2/badge.svg)](https://snyk.io/test/github/carlansley/swagger2)
-
 # swagger2
 Loading, parsing and validating requests to HTTP services based on Swagger v2.0 documents.
 
@@ -10,14 +5,14 @@ Loading, parsing and validating requests to HTTP services based on Swagger v2.0 
 
 * Fast.  Pre-compiled regular expressions and code generation used to validate the inputs and outputs
 of Swagger 2.0 operations at run-time.
-* Typed.  swagger2 is implemented in TypeScript 2, including a fully annotated TypeScript definition of
+* Typed.  swagger2 is implemented in TypeScript, including a fully annotated TypeScript definition of
 the Swagger 2.0 document object.  Makes working with Swagger objects more pleasant in the IDE of your
 choosing (WebStorm, Atom, etc).
 
 ## Installation
 
 ```shell
-$ npm install swagger2 --save
+$ npm add swagger2
 ```
 
 ## Usage
@@ -129,7 +124,8 @@ $ npm test
 To see code coverage in a web-browser:
 
 ```shell
-$ npm run cover:browser
+$ npm run ci:coverage
+$ open coverage/lcov-report/index.html (on Mac)
 ```
 
 To clean up:
