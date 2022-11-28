@@ -1,4 +1,4 @@
-swagger: "2.0"
+swagger: '2.0'
 info:
   version: 1.0.0
   title: Swagger Petstore
@@ -44,7 +44,7 @@ paths:
           type: integer
           format: int32
       responses:
-        "200":
+        '200':
           description: pet response
           schema:
             type: array
@@ -65,7 +65,7 @@ paths:
           schema:
             $ref: '#/definitions/NewPet'
       responses:
-        "200":
+        '200':
           description: pet response
           schema:
             $ref: '#/definitions/Pet'
@@ -85,7 +85,7 @@ paths:
           type: integer
           format: int64
       responses:
-        "200":
+        '200':
           description: pet response
           schema:
             $ref: '#/definitions/Pet'
@@ -104,7 +104,7 @@ paths:
           type: integer
           format: int64
       responses:
-        "204":
+        '204':
           description: pet deleted
         default:
           description: unexpected error
@@ -115,7 +115,7 @@ definitions:
     allOf:
       - $ref: '#/definitions/NewPet'
       - required:
-        - id
+          - id
         properties:
           id:
             type: integer
@@ -123,12 +123,12 @@ definitions:
 
   NewPet:
     required:
-      - name  
+      - name
     properties:
       name:
         type: string
       tag:
-        type: string    
+        type: string
 
   Error:
     required:

@@ -1,145 +1,145 @@
 ---
-  swagger: "2.0"
-  info:
-    version: "1.0.0"
-    title: "Swagger Petstore"
-    description: "A sample API that uses a petstore as an example to demonstrate features in the swagger-2.0 specification"
-    termsOfService: "http://swagger.io/terms/"
-    contact:
-      name: "Swagger API Team"
-    license:
-      name: "MIT"
-  host: "petstore.swagger.io"
-  basePath: "/api"
-  schemes:
-    - "http"
-  consumes:
-    - "application/json"
-  produces:
-    - "application/json"
-  paths:
-    /petsByNumber/{num}:
+swagger: '2.0'
+info:
+  version: '1.0.0'
+  title: 'Swagger Petstore'
+  description: 'A sample API that uses a petstore as an example to demonstrate features in the swagger-2.0 specification'
+  termsOfService: 'http://swagger.io/terms/'
+  contact:
+    name: 'Swagger API Team'
+  license:
+    name: 'MIT'
+host: 'petstore.swagger.io'
+basePath: '/api'
+schemes:
+  - 'http'
+consumes:
+  - 'application/json'
+produces:
+  - 'application/json'
+paths:
+  /petsByNumber/{num}:
+    parameters:
+      - name: num
+        in: path
+        required: true
+        description: number of the pet to lookup
+        type: number
+    get:
+      description: 'Returns a pet by name'
+      produces:
+        - 'application/json'
+      responses:
+        '200':
+          description: 'A pet'
+          schema:
+            $ref: '#/definitions/Pet'
+  /petsByBoolean/{bool}:
+    parameters:
+      - name: bool
+        in: path
+        required: true
+        description: boolean of the pet to lookup
+        type: boolean
+    get:
+      description: 'Returns a pet by boolean'
+      produces:
+        - 'application/json'
+      responses:
+        '200':
+          description: 'A pet'
+          schema:
+            $ref: '#/definitions/Pet'
+  /pets/{name}:
+    parameters:
+      - name: name
+        in: path
+        required: true
+        description: name of the pet to lookup
+        type: string
+      - name: String
+        in: query
+        required: true
+        description: string query parameter
+        type: string
+    get:
+      description: 'Returns a pet by name'
+      produces:
+        - 'application/json'
       parameters:
-        - name: num
-          in: path
+        - name: Number
+          in: query
           required: true
-          description: number of the pet to lookup
+          description: number query parameter
           type: number
-      get:
-        description: "Returns a pet by name"
-        produces:
-          - "application/json"
-        responses:
-          "200":
-            description: "A pet"
-            schema:
-              $ref: "#/definitions/Pet"
-    /petsByBoolean/{bool}:
+      responses:
+        '200':
+          description: 'A pet'
+          schema:
+            $ref: '#/definitions/Pet'
+    put:
+      description: 'Updates a pet by name'
+      produces:
+        - 'application/json'
       parameters:
-        - name: bool
-          in: path
-          required: true
-          description: boolean of the pet to lookup
-          type: boolean
-      get:
-        description: "Returns a pet by boolean"
-        produces:
-          - "application/json"
-        responses:
-          "200":
-            description: "A pet"
-            schema:
-              $ref: "#/definitions/Pet"
-    /pets/{name}:
-      parameters:
-        - name: name
-          in: path
-          required: true
-          description: name of the pet to lookup
-          type: string
         - name: String
           in: query
           required: true
-          description: string query parameter
-          type: string
-      get:
-        description: "Returns a pet by name"
-        produces:
-          - "application/json"
-        parameters:
-          - name: Number
-            in: query
-            required: true
-            description: number query parameter
-            type: number
-        responses:
-          "200":
-            description: "A pet"
-            schema:
-              $ref: "#/definitions/Pet"
-      put:
-        description: "Updates a pet by name"
-        produces:
-          - "application/json"
-        parameters:
-          - name: String
-            in: query
-            required: true
-            description: string overridden as number query parameter
-            type: number
-        responses:
-          "200":
-            description: "A list of pets."
-            schema:
-              $ref: "#/definitions/Pet"
-      patch:
-        description: "Updates a pet by name"
-        produces:
-          - "application/json"
-        parameters:
-          - name: tag
-            in: formData
-            required: true
-            description: pet tag
-            type: string
-        responses:
-          "200":
-            description: "A list of pets."
-            schema:
-              $ref: "#/definitions/Pet"
-    /pets/{breed}/{fur}:
+          description: string overridden as number query parameter
+          type: number
+      responses:
+        '200':
+          description: 'A list of pets.'
+          schema:
+            $ref: '#/definitions/Pet'
+    patch:
+      description: 'Updates a pet by name'
+      produces:
+        - 'application/json'
       parameters:
-        - name: breed
-          in: path
+        - name: tag
+          in: formData
           required: true
-          description: the type of pet
+          description: pet tag
           type: string
-        - name: fur
-          in: path
-          required: true
-          description: the type of fur
-          type: string
-      get:
-        description: "Returns a pet by breed and fur type"
-        produces:
-          - "application/json"
-        responses:
-          "200":
-            description: "A pet"
-            schema:
-              $ref: "#/definitions/Pet"
+      responses:
+        '200':
+          description: 'A list of pets.'
+          schema:
+            $ref: '#/definitions/Pet'
+  /pets/{breed}/{fur}:
+    parameters:
+      - name: breed
+        in: path
+        required: true
+        description: the type of pet
+        type: string
+      - name: fur
+        in: path
+        required: true
+        description: the type of fur
+        type: string
+    get:
+      description: 'Returns a pet by breed and fur type'
+      produces:
+        - 'application/json'
+      responses:
+        '200':
+          description: 'A pet'
+          schema:
+            $ref: '#/definitions/Pet'
 
-  definitions:
-    Pet:
-      type: "object"
-      required:
-        - "id"
-        - "name"
-      properties:
-        id:
-          type: "integer"
-          format: "int64"
-        name:
-          type: "string"
-        tag:
-          type: "string"
+definitions:
+  Pet:
+    type: 'object'
+    required:
+      - 'id'
+      - 'name'
+    properties:
+      id:
+        type: 'integer'
+        format: 'int64'
+      name:
+        type: 'string'
+      tag:
+        type: 'string'

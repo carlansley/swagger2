@@ -30,15 +30,12 @@
     "json-schema-deref-sync": "^0.14.0"
   },
   "devDependencies": {
-    "@checkdigit/eslint-config": "^7.1.0",
-    "@checkdigit/prettier-config": "^2.1.0",
-    "@checkdigit/typescript-config": "^3.0.1",
-    "@types/jest": "^28.1.7",
+    "@checkdigit/eslint-config": "^7.4.0",
+    "@checkdigit/jest-config": "^2.1.0",
+    "@checkdigit/prettier-config": "^3.1.0",
+    "@checkdigit/typescript-config": "^3.2.0",
     "@types/js-yaml": "^4.0.5",
-    "jest": "^28.1.3",
-    "rimraf": "^3.0.2",
-    "ts-jest": "^28.0.8",
-    "ts-node": "^10.9.1"
+    "rimraf": "^3.0.2"
   },
   "maintainers": [
     {
@@ -47,21 +44,11 @@
     }
   ],
   "jest": {
-    "preset": "ts-jest",
-    "collectCoverageFrom": [
-      "<rootDir>/src/**",
-      "!<rootDir>/src/**/*.json",
-      "!<rootDir>/src/**/*.spec.ts",
-      "!<rootDir>/src/**/*.test.ts"
-    ],
-    "globals": {
-      "ts-jest": {
-        "isolatedModules": true,
-        "diagnostics": false
-      }
-    },
-    "testMatch": [
-      "<rootDir>/src/**/*.spec.ts"
+    "preset": "@checkdigit/jest-config"
+  },
+  "eslintConfig": {
+    "extends": [
+      "@checkdigit/eslint-config"
     ]
   },
   "scripts": {
@@ -69,8 +56,8 @@
     "prepublishOnly": "npm run dist && rimraf .github src test typings .eslintrc .gitignore tsconfig.json",
     "lint": "eslint -f unix src/**/*.ts",
     "lint:fix": "eslint -f unix src/**/*.ts --fix",
-    "prettier": "prettier --list-different src/**/*.ts",
-    "prettier:fix": "prettier --write src/**/*.ts",
+    "prettier": "prettier --ignore-path .gitignore --list-different .",
+    "prettier:fix": "prettier --ignore-path .gitignore --write .",
     "test": "npm run ci:compile && npm run ci:test && npm run ci:lint && npm run ci:style",
     "ci:compile": "tsc --noEmit",
     "ci:test": "jest --coverage=false",

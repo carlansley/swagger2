@@ -47,7 +47,7 @@ function isEmpty(value: unknown) {
 
 function validate(value: unknown, schema: CompiledDefinition): ValidationError | undefined {
   // if no schema, treat as an error
-  if (typeof schema === 'undefined') {
+  if (schema === undefined) {
     return {
       actual: value,
       expected: {
@@ -77,17 +77,17 @@ function validate(value: unknown, schema: CompiledDefinition): ValidationError |
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-explicit-any
-  if (typeof (error as any).expected.schema === 'undefined') {
+  if ((error as any).expected.schema === undefined) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-explicit-any
     delete (error as any).expected.schema;
   }
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-explicit-any
-  if (typeof (error as any).expected.type === 'undefined') {
+  if ((error as any).expected.type === undefined) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-explicit-any
     delete (error as any).expected.type;
   }
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-explicit-any
-  if (typeof (error as any).expected.format === 'undefined') {
+  if ((error as any).expected.format === undefined) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-explicit-any
     delete (error as any).expected.format;
   }
@@ -112,7 +112,7 @@ export function request(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   pathParameters?: { [name: string]: any }
 ): ValidationError[] | undefined {
-  if (typeof compiledPath === 'undefined') {
+  if (compiledPath === undefined) {
     return;
   }
 
@@ -120,7 +120,7 @@ export function request(
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-member-access
   const operation = (compiledPath.path as any)[method.toLowerCase()];
 
-  if (typeof operation === 'undefined') {
+  if (operation === undefined) {
     // operation not defined, return 405 (method not allowed)
     return;
   }
@@ -134,13 +134,13 @@ export function request(
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   if (parameters.length === 0) {
     const error = validate(body, { validator: isEmpty });
-    if (typeof error !== 'undefined') {
+    if (error !== undefined) {
       error.where = 'body';
       validationErrors.push(error);
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    if (typeof query !== 'undefined' && Object.keys(query).length > 0) {
+    if (query !== undefined && Object.keys(query).length > 0) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       for (const key of Object.keys(query)) {
         validationErrors.push({
@@ -162,11 +162,12 @@ export function request(
     let value: any;
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     switch (parameter.in) {
-      case 'query':
+      case 'query': {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
         value = (query ?? {})[parameter.name];
         break;
-      case 'path':
+      }
+      case 'path': {
         if (pathParameters) {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
           value = pathParameters[parameter.name];
@@ -178,27 +179,31 @@ export function request(
           value = actual ? actual[valueIndex] : undefined;
         }
         break;
-      case 'body':
+      }
+      case 'body': {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         value = body;
         bodyDefined = true;
         break;
-      case 'header':
+      }
+      case 'header': {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
         value = (headers ?? {})[parameter.name];
         break;
-      case 'formData':
+      }
+      case 'formData': {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
         value = (body ?? {})[parameter.name];
         bodyDefined = true;
         break;
+      }
       default:
       // do nothing
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     const error = validate(value, parameter);
-    if (typeof error !== 'undefined') {
+    if (error !== undefined) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
       error.where = parameter.in;
       validationErrors.push(error);
@@ -206,9 +211,9 @@ export function request(
   });
 
   // ensure body is undefined if no body schema is defined
-  if (!bodyDefined && typeof body !== 'undefined') {
+  if (!bodyDefined && body !== undefined) {
     const error = validate(body, { validator: isEmpty });
-    if (typeof error !== 'undefined') {
+    if (error !== undefined) {
       error.where = 'body';
       validationErrors.push(error);
     }
@@ -223,7 +228,7 @@ export function response(
   status: number,
   body?: unknown
 ): ValidationError | undefined {
-  if (typeof compiledPath === 'undefined') {
+  if (compiledPath === undefined) {
     return {
       actual: 'UNDEFINED_PATH',
       expected: 'PATH',
@@ -236,7 +241,7 @@ export function response(
   // check the response matches the swagger schema
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
   let schema = operation.responses[status];
-  if (typeof schema === 'undefined') {
+  if (schema === undefined) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
     schema = operation.responses.default;
   }

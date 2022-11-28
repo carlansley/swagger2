@@ -1,4 +1,4 @@
-swagger: "2.0"
+swagger: '2.0'
 info:
   version: 1.0.0
   title: Swagger Petstore
@@ -35,7 +35,7 @@ paths:
           required: false
           type: boolean
       responses:
-        "200":
+        '200':
           description: An paged array of pets
           headers:
             x-next:
@@ -53,7 +53,7 @@ paths:
       tags:
         - pets
       responses:
-        "201":
+        '201':
           description: Null response
         default:
           description: unexpected error
@@ -68,7 +68,7 @@ paths:
           schema:
             $ref: '#/definitions/Pets'
       responses:
-        "201":
+        '201':
           description: Null response
         default:
           description: unexpected error
@@ -82,13 +82,13 @@ paths:
       tags:
         - pets
       parameters:
-        - $ref: "#/parameters/ifMatch"
-        - $ref: "#/parameters/ifNoneMatch"
-        - $ref: "#/parameters/stringArray"
-        - $ref: "#/parameters/optionalNumberArray"
-        - $ref: "#/parameters/optionalBooleanArray"
-        - $ref: "#/parameters/optionalSpacedBooleanArray"
-        - $ref: "#/parameters/optionalTabbedBooleanArray"
+        - $ref: '#/parameters/ifMatch'
+        - $ref: '#/parameters/ifNoneMatch'
+        - $ref: '#/parameters/stringArray'
+        - $ref: '#/parameters/optionalNumberArray'
+        - $ref: '#/parameters/optionalBooleanArray'
+        - $ref: '#/parameters/optionalSpacedBooleanArray'
+        - $ref: '#/parameters/optionalTabbedBooleanArray'
         - name: petId
           in: path
           required: true
@@ -96,7 +96,7 @@ paths:
           type: integer
           format: int32
       responses:
-        "200":
+        '200':
           description: Expected response to a valid request
           schema:
             $ref: '#/definitions/Pets'
@@ -134,7 +134,6 @@ definitions:
         type: string
 
 parameters:
-
   ifNoneMatch:
     name: If-None-Match
     in: header
