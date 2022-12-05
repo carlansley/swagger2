@@ -3,7 +3,10 @@ name: Coverage
 on:
   pull_request:
     branches:
-    - "main"
+      - 'main'
+
+env:
+  CI: true
 
 jobs:
   branchBuild:
@@ -11,7 +14,7 @@ jobs:
     name: Branch Build
     strategy:
       matrix:
-        node-version: [16.x]
+        node-version: [18.x]
     steps:
       - uses: actions/checkout@v3
         with:
@@ -22,26 +25,18 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
       - name: Install dependencies
-        run: npm ci
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          CI: true
+        run: npm ci --ignore-scripts
       - name: Calculate Code Coverage
         run: npm run ci:coverage
-        env:
-          CI: true
       - name: Create Coverage Report for base branch
         run: |
           mv coverage/lcov.info coverage/lcov_head.info
           git fetch
           git checkout origin/${{ github.event.pull_request.base.ref }}
-          npm ci && npm run ci:coverage
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          CI: true
+          npm ci --ignore-scripts && npm run ci:coverage
       - name: Post Coverage Report
-        uses: romeovs/lcov-reporter-action@v0.3.1
+        uses: checkdigit/github-actions/coverage-reporter@main
         with:
-          lcov-file: "coverage/lcov_head.info"
-          lcov-base: "coverage/lcov.info"
+          lcov-file: 'coverage/lcov_head.info'
+          lcov-base: 'coverage/lcov.info'
           delete-old-comments: true

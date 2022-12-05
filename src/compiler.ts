@@ -70,48 +70,55 @@ function stringValidator(schema: Record<string, unknown>) {
 
     switch (schema['type']) {
       case 'number':
-      case 'integer':
+      case 'integer': {
         if (!Number.isNaN(value as number)) {
           // if the value is a number, make sure it's a number
           value = Number(value);
         }
         break;
+      }
 
-      case 'boolean':
+      case 'boolean': {
         if (value === 'true') {
           value = true;
         } else if (value === 'false') {
           value = false;
         }
         break;
+      }
 
-      case 'array':
+      case 'array': {
         if (!Array.isArray(value)) {
           const format = schema['collectionFormat'] ?? ('csv' as CollectionFormat);
           // eslint-disable-next-line sonarjs/no-nested-switch
           switch (format) {
-            case 'csv':
+            case 'csv': {
               value = String(value).split(',');
               break;
-            case 'ssv':
+            }
+            case 'ssv': {
               value = String(value).split(' ');
               break;
-            case 'tsv':
+            }
+            case 'tsv': {
               value = String(value).split('\t');
               break;
-            case 'pipes':
+            }
+            case 'pipes': {
               value = String(value).split('|');
               break;
+            }
             case 'multi':
-            default:
+            default: {
               value = [value];
               break;
+            }
           }
         }
         // eslint-disable-next-line sonarjs/no-nested-switch
         switch ((schema['items'] as { type: string }).type) {
           case 'number':
-          case 'integer':
+          case 'integer': {
             value = (value as number[]).map((number_) => {
               if (!Number.isNaN(number_)) {
                 // if the value is a number, make sure it's a number
@@ -120,7 +127,8 @@ function stringValidator(schema: Record<string, unknown>) {
               return number_;
             });
             break;
-          case 'boolean':
+          }
+          case 'boolean': {
             value = (value as (boolean | 'true' | 'false')[]).map((bool) => {
               if (bool === 'true') {
                 return true;
@@ -130,10 +138,12 @@ function stringValidator(schema: Record<string, unknown>) {
               return bool;
             });
             break;
+          }
           default:
           // leave as-is
         }
         break;
+      }
 
       default:
       // leave as-is
@@ -197,7 +207,7 @@ export function compile(document: Document): Compiled {
         } else {
           // no schema, so ensure there is no response
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          response.validator = (body: unknown) => typeof body === 'undefined' || body === null || body === '';
+          response.validator = (body: unknown) => body === undefined || body === null || body === '';
         }
       }
     }

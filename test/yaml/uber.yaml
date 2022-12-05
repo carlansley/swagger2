@@ -1,10 +1,10 @@
 # this is an example of the Uber API
 # as a demonstration of an API spec in YAML
-swagger: "2.0"
+swagger: '2.0'
 info:
   title: Uber API
   description: Move your app forward with the Uber API
-  version: "1.0.0"
+  version: '1.0.0'
 # the domain of the service
 host: api.uber.com
 # array of all schemes that your API supports
@@ -37,12 +37,12 @@ paths:
           required: true
           type: number
           format: double
-      security: 
+      security:
         - apikey: []
-      tags: 
+      tags:
         - Products
-      responses:  
-        "200":
+      responses:
+        '200':
           description: An array of products
           schema:
             type: array
@@ -81,10 +81,10 @@ paths:
           required: true
           type: number
           format: double
-      tags: 
+      tags:
         - Estimates
-      responses:  
-        "200":
+      responses:
+        '200':
           description: An array of price estimates by product
           schema:
             type: array
@@ -120,10 +120,10 @@ paths:
           in: query
           type: string
           description: Unique identifier representing a specific product for a given latitude & longitude.
-      tags: 
+      tags:
         - Estimates
-      responses:  
-        "200":
+      responses:
+        '200':
           description: An array of products
           schema:
             type: array
@@ -137,10 +137,10 @@ paths:
     get:
       summary: User Profile
       description: The User Profile endpoint returns information about the Uber user that has authorized with the application.
-      tags: 
+      tags:
         - User
       responses:
-        "200":
+        '200':
           description: Profile information for a user
           schema:
             $ref: '#/definitions/Profile'
@@ -161,12 +161,12 @@ paths:
         - name: limit
           in: query
           type: integer
-          format: int32 
+          format: int32
           description: Number of items to retrieve. Default is 5, maximum is 100.
-      tags: 
+      tags:
         - User
       responses:
-        "200":
+        '200':
           description: History information for the given user
           schema:
             $ref: '#/definitions/Activities'
@@ -197,8 +197,8 @@ definitions:
       products:
         description: Contains the list of products
         type: array
-        items: 
-          $ref: "#/definitions/Product"
+        items:
+          $ref: '#/definitions/Product'
   PriceEstimate:
     properties:
       product_id:
@@ -206,11 +206,11 @@ definitions:
         description: Unique identifier representing a specific product for a given latitude & longitude. For example, uberX in San Francisco will have a different product_id than uberX in Los Angeles
       currency_code:
         type: string
-        description: "[ISO 4217](http://en.wikipedia.org/wiki/ISO_4217) currency code."
+        description: '[ISO 4217](http://en.wikipedia.org/wiki/ISO_4217) currency code.'
       display_name:
         type: string
         description: Display name of product.
-      estimate: 
+      estimate:
         type: string
         description: Formatted string of estimate in local currency of the start location. Estimate could be a range, a single number (flat rate) or "Metered" for TAXI.
       low_estimate:
@@ -238,7 +238,7 @@ definitions:
         description: Image URL of the Uber user.
       promo_code:
         type: string
-        description: Promo code of the Uber user.   
+        description: Promo code of the Uber user.
   Activity:
     properties:
       uuid:

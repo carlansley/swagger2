@@ -35,14 +35,16 @@ import * as yaml from 'js-yaml';
 import type { Document } from './schema';
 import * as schema from './schema.json';
 
-// build a swagger validator from the official v2.0 schema
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const schemaValidator = jsonValidator(schema as any);
+let schemaValidator: ReturnType<typeof jsonValidator> | undefined;
 
 /*
  * Validate a swagger document against the 2.0 schema, returning a typed Document object.
  */
 export function validateDocument(document: unknown): Document | undefined {
+  if (schemaValidator === undefined) {
+    // build a swagger validator from the official v2.0 schema
+    schemaValidator = jsonValidator(schema as Parameters<typeof jsonValidator>[0]);
+  }
   if (!schemaValidator(document)) {
     return;
   }
