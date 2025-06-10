@@ -8,7 +8,7 @@ Loading, parsing and validating requests to HTTP services based on Swagger v2.0 
   of Swagger 2.0 operations at run-time.
 - Typed. swagger2 is implemented in TypeScript, including a fully annotated TypeScript definition of
   the Swagger 2.0 document object. Makes working with Swagger objects more pleasant in the IDE of your
-  choosing (WebStorm, Atom, etc).
+  choosing (WebStorm, Atom, etc.).
 
 ## Installation
 
@@ -38,10 +38,10 @@ the framework of your choosing. Koa 2 example:
 ```typescript
 let app = new Koa();
 
-...
+//...
 app.use(body());
 app.use(createKoaMiddleware(document));
-...
+//...
 
 
 function createKoaMiddleware(document: swagger.Document) {
@@ -122,7 +122,7 @@ $ npm install
 $ npm test
 ```
 
-To see code coverage in a web-browser:
+To see code coverage in a web browser:
 
 ```shell
 $ npm run ci:coverage
