@@ -29,6 +29,7 @@
 import { strict as assert } from 'node:assert';
 import path from 'node:path';
 import { describe, it } from 'node:test';
+import { fileURLToPath } from 'node:url';
 
 import * as document from './document.ts';
 import * as schema from './schema.ts';
@@ -935,7 +936,7 @@ const UBER_DOCUMENT: schema.Document = {
   },
 };
 
-const TEST_YAML_DIR = path.join(`./test/yaml/`);
+const TEST_YAML_DIR = `${path.dirname(fileURLToPath(import.meta.url))}/../test/yaml/`;
 
 function load(name: string) {
   // eslint-disable-next-line n/no-sync
