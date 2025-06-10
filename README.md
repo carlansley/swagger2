@@ -43,14 +43,11 @@ app.use(body());
 app.use(createKoaMiddleware(document));
 //...
 
-
 function createKoaMiddleware(document: swagger.Document) {
-
   // construct a validation object, pre-compiling all schema and regex required
   let compiled = swagger.compileDocument(document);
 
-  return async(context, next) => {
-
+  return async (context, next) => {
     if (!context.path.startsWith(document.basePath)) {
       // not a path that we care about
       await next();
@@ -65,8 +62,12 @@ function createKoaMiddleware(document: swagger.Document) {
     }
 
     // check the request matches the swagger schema
-    let validationErrors = swagger.validateRequest(compiledPath,
-      context.method, context.request.query, context.request.body);
+    let validationErrors = swagger.validateRequest(
+      compiledPath,
+      context.method,
+      context.request.query,
+      context.request.body,
+    );
     if (validationErrors === undefined) {
       // operation not defined, return 405 (method not allowed)
       context.status = 405;
@@ -77,7 +78,7 @@ function createKoaMiddleware(document: swagger.Document) {
       context.status = 400;
       context.body = {
         code: 'SWAGGER_REQUEST_VALIDATION_FAILED',
-        errors: validationErrors
+        errors: validationErrors,
       };
       return;
     }
@@ -86,19 +87,22 @@ function createKoaMiddleware(document: swagger.Document) {
     await next();
 
     // check the response matches the swagger schema
-    let error = swagger.validateResponse(compiledPath, context.method, context.status, context.body);
+    let error = swagger.validateResponse(
+      compiledPath,
+      context.method,
+      context.status,
+      context.body,
+    );
     if (error) {
       error.where = 'response';
       context.status = 500;
       context.body = {
         code: 'SWAGGER_RESPONSE_VALIDATION_FAILED',
-        errors: [error]
+        errors: [error],
       };
     }
   };
 }
-
-
 ```
 
 There is a complete implementation of this example/use-case in the <a href="https://github.com/carlansley/swagger2-koa">swagger2-koa</a> module,
