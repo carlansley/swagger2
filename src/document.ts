@@ -33,7 +33,7 @@ import jsonValidator from 'is-my-json-valid';
 import * as yaml from 'js-yaml';
 
 import type { Document } from './schema.ts';
-import * as schema from './schema.json' with { type: 'json' };
+import schema from './schema.json' with { type: 'json' };
 
 // eslint-disable-next-line @checkdigit/no-side-effects
 let schemaValidator: ReturnType<typeof jsonValidator> | undefined;

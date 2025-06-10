@@ -962,7 +962,7 @@ describe('document', () => {
 
   describe('validateDocument', () => {
     it('fail validation on empty object', () => {
-      assert.deepEqual(document.validateDocument({}), {});
+      assert.deepEqual(document.validateDocument({}), undefined);
     });
 
     it('succeed validation on minimal Swagger v2.0 documents', () => {
