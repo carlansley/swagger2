@@ -27,7 +27,7 @@
 import { strict as assert } from 'node:assert';
 import { describe, it } from 'node:test';
 
-import * as swagger from './swagger.ts';
+import * as swagger from './index.ts';
 
 function compile(fileName: string) {
   // eslint-disable-next-line n/no-sync

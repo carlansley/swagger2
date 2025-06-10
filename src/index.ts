@@ -1,4 +1,4 @@
-// swagger.ts
+// index.ts
 
 // eslint-disable-next-line spaced-comment,@typescript-eslint/triple-slash-reference
 /// <reference path="./json-schema-deref-sync/index.d.ts" />
