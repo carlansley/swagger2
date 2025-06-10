@@ -20,7 +20,7 @@ $ npm add swagger2
 
 Basic loading and validation of swagger 2.0 document:
 
-```
+```typescript
 import * as swagger from 'swagger2';
 
 // load YAML swagger file
@@ -35,7 +35,7 @@ if (!swagger.validateDocument(document)) {
 You can compile the document for fast validation of operation requests and responses within
 the framework of your choosing. Koa 2 example:
 
-```
+```typescript
 let app = new Koa();
 
 ...
@@ -109,7 +109,7 @@ so if you're using Koa 2 it may make sense to use that instead of swagger2 direc
 - currently only supports synchronous loading of full documents (via swagger.loadDocumentSync)
 - does not support validation of file attachments
 - does not support validation of mime-types
-- requires node v16.0 or above
+- requires node v22.0 or above
 
 ## Development
 

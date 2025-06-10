@@ -31,17 +31,13 @@
  THE SOFTWARE.
  */
 
-import * as compiler from './compiler';
-import * as document from './document';
-import type * as schema from './schema';
-import * as validate from './validate';
+export { loadDocumentSync, validateDocument } from './document.ts';
 
-// eslint-disable-next-line no-sync
-export const loadDocumentSync = document.loadDocumentSync;
-export const validateDocument = document.validateDocument;
-export const validateRequest = validate.request;
-export const validateResponse = validate.response;
-export const compileDocument = compiler.compile;
+export {
+  request as validateRequest,
+  response as validateResponse,
+} from './validate.ts';
 
-export type Compiled = compiler.Compiled;
-export type Document = schema.Document;
+export { compile as compileDocument, type Compiled } from './compiler.ts';
+
+export type { Document } from './schema.ts';

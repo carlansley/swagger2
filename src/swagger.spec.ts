@@ -24,13 +24,13 @@
  THE SOFTWARE.
  */
 
-import * as assert from 'node:assert';
+import { strict as assert } from 'node:assert';
+import { describe, it } from 'node:test';
 
-import * as swagger from './swagger';
-
-/* eslint-disable no-sync */
+import * as swagger from './swagger.ts';
 
 function compile(fileName: string) {
+  // eslint-disable-next-line n/no-sync
   const raw = swagger.loadDocumentSync(fileName);
   const document: swagger.Document | undefined = swagger.validateDocument(raw);
 
@@ -43,28 +43,33 @@ function compile(fileName: string) {
 }
 
 describe('swagger2', () => {
-  it('has a loadDocumentSync function', () => assert.strictEqual(typeof swagger.loadDocumentSync, 'function'));
-  it('has a validateDocument function', () => assert.strictEqual(typeof swagger.validateDocument, 'function'));
-  it('has a validateRequest function', () => assert.strictEqual(typeof swagger.validateRequest, 'function'));
-  it('has a validateResponse function', () => assert.strictEqual(typeof swagger.validateResponse, 'function'));
-  it('has a compileDocument function', () => assert.strictEqual(typeof swagger.compileDocument, 'function'));
+  it('has a loadDocumentSync function', () =>
+    assert.equal(typeof swagger.loadDocumentSync, 'function'));
+  it('has a validateDocument function', () =>
+    assert.equal(typeof swagger.validateDocument, 'function'));
+  it('has a validateRequest function', () =>
+    assert.equal(typeof swagger.validateRequest, 'function'));
+  it('has a validateResponse function', () =>
+    assert.equal(typeof swagger.validateResponse, 'function'));
+  it('has a compileDocument function', () =>
+    assert.equal(typeof swagger.compileDocument, 'function'));
 
   describe('petstore', () => {
     const compiled = compile('test/yaml/petstore.yaml');
 
     it('invalid paths are undefined', () => {
-      assert.strictEqual(undefined, compiled('/v1/bad'));
-      assert.strictEqual(undefined, compiled('/v2/pets'));
+      assert.equal(undefined, compiled('/v1/bad'));
+      assert.equal(undefined, compiled('/v2/pets'));
     });
 
     it('compiles valid paths', () => {
       const compiledPath = compiled('/v1/pets');
-      assert.notStrictEqual(compiledPath, undefined);
+      assert.notEqual(compiledPath, undefined);
       if (compiledPath !== undefined) {
-        assert.strictEqual(compiledPath.name, '/pets');
-        assert.notStrictEqual(compiledPath.path.get, undefined);
+        assert.equal(compiledPath.name, '/pets');
+        assert.notEqual(compiledPath.path.get, undefined);
         if (compiledPath.path.get !== undefined) {
-          assert.strictEqual(compiledPath.path.get.summary, 'List all pets');
+          assert.equal(compiledPath.path.get.summary, 'List all pets');
         }
       }
     });
@@ -73,12 +78,18 @@ describe('swagger2', () => {
       const compiledPath = compiled('/v1/pets');
 
       it('do not allow DELETE', () => {
-        assert.strictEqual(undefined, swagger.validateRequest(compiledPath, 'delete', {}, {}));
+        assert.equal(
+          undefined,
+          swagger.validateRequest(compiledPath, 'delete', {}, {}),
+        );
       });
 
       it('do not allow undefined paths on requests or responses', () => {
-        assert.strictEqual(undefined, swagger.validateRequest(undefined, 'delete', {}, {}));
-        assert.deepStrictEqual(swagger.validateResponse(undefined, 'delete', 201), {
+        assert.equal(
+          undefined,
+          swagger.validateRequest(undefined, 'delete', {}, {}),
+        );
+        assert.deepEqual(swagger.validateResponse(undefined, 'delete', 201), {
           actual: 'UNDEFINED_PATH',
           expected: 'PATH',
         });
@@ -86,23 +97,26 @@ describe('swagger2', () => {
 
       describe('put', () => {
         it('empty array works', () => {
-          assert.deepStrictEqual(swagger.validateRequest(compiledPath, 'put', undefined, []), []);
+          assert.deepEqual(
+            swagger.validateRequest(compiledPath, 'put', undefined, []),
+            [],
+          );
         });
 
         it('pet works', () => {
-          assert.deepStrictEqual(
+          assert.deepEqual(
             swagger.validateRequest(compiledPath, 'put', undefined, [
               {
                 id: 123,
                 name: 'name',
               },
             ]),
-            []
+            [],
           );
         });
 
         it('pet with empty name does not work', () => {
-          assert.deepStrictEqual(
+          assert.deepEqual(
             swagger.validateRequest(compiledPath, 'put', undefined, [
               {
                 id: 123,
@@ -128,13 +142,13 @@ describe('swagger2', () => {
                 error: 'data.0.name has less length than allowed',
                 where: 'body',
               },
-            ]
+            ],
           );
         });
 
         describe('post', () => {
           it('body must be empty', () => {
-            assert.deepStrictEqual(
+            assert.deepEqual(
               swagger.validateRequest(compiledPath, 'post', undefined, {
                 x: 'hello',
               }),
@@ -144,43 +158,57 @@ describe('swagger2', () => {
                   expected: undefined,
                   where: 'body',
                 },
-              ]
+              ],
             );
           });
 
           it('parameters must be empty', () => {
-            assert.deepStrictEqual(swagger.validateRequest(compiledPath, 'post', { x: 'y' }), [
-              {
-                where: 'query',
-                name: 'x',
-                actual: 'y',
-                expected: {},
-              },
-            ]);
+            assert.deepEqual(
+              swagger.validateRequest(compiledPath, 'post', { x: 'y' }),
+              [
+                {
+                  where: 'query',
+                  name: 'x',
+                  actual: 'y',
+                  expected: {},
+                },
+              ],
+            );
           });
 
           it('succeed if request valid', () => {
-            assert.deepStrictEqual(swagger.validateRequest(compiledPath, 'post'), []);
+            assert.deepEqual(swagger.validateRequest(compiledPath, 'post'), []);
           });
 
           it('fail if response invalid', () => {
-            assert.deepStrictEqual(swagger.validateResponse(compiledPath, 'post', 201, {}), {
-              actual: {},
-              expected: undefined,
-            });
+            assert.deepEqual(
+              swagger.validateResponse(compiledPath, 'post', 201, {}),
+              {
+                actual: {},
+                expected: undefined,
+              },
+            );
           });
 
           it('succeed if response valid', () => {
-            assert.strictEqual(swagger.validateResponse(compiledPath, 'post', 201), undefined);
-            // tslint:disable-next-line:no-null-keyword
-            assert.strictEqual(swagger.validateResponse(compiledPath, 'post', 201, null), undefined);
-            assert.strictEqual(swagger.validateResponse(compiledPath, 'post', 201, ''), undefined);
+            assert.equal(
+              swagger.validateResponse(compiledPath, 'post', 201),
+              undefined,
+            );
+            assert.equal(
+              swagger.validateResponse(compiledPath, 'post', 201, null),
+              undefined,
+            );
+            assert.equal(
+              swagger.validateResponse(compiledPath, 'post', 201, ''),
+              undefined,
+            );
           });
         });
 
         describe('get', () => {
           it('limit must be a number', () => {
-            assert.deepStrictEqual(
+            assert.deepEqual(
               [
                 {
                   actual: 'hello',
@@ -188,10 +216,10 @@ describe('swagger2', () => {
                   where: 'query',
                 },
               ],
-              swagger.validateRequest(compiledPath, 'get', { limit: 'hello' })
+              swagger.validateRequest(compiledPath, 'get', { limit: 'hello' }),
             );
 
-            assert.deepStrictEqual(
+            assert.deepEqual(
               [
                 {
                   actual: 23.3,
@@ -199,10 +227,10 @@ describe('swagger2', () => {
                   where: 'query',
                 },
               ],
-              swagger.validateRequest(compiledPath, 'get', { limit: 23.3 })
+              swagger.validateRequest(compiledPath, 'get', { limit: 23.3 }),
             );
 
-            assert.deepStrictEqual(
+            assert.deepEqual(
               [
                 {
                   actual: 'hello',
@@ -212,28 +240,37 @@ describe('swagger2', () => {
               ],
               swagger.validateRequest(compiledPath, 'get', {
                 numberLimit: 'hello',
-              })
+              }),
             );
 
-            assert.deepStrictEqual(swagger.validateRequest(compiledPath, 'get', { limit: 5 }), []);
-            assert.deepStrictEqual(swagger.validateRequest(compiledPath, 'get', { numberLimit: 5 }), []);
-            assert.deepStrictEqual(
+            assert.deepEqual(
+              swagger.validateRequest(compiledPath, 'get', { limit: 5 }),
+              [],
+            );
+            assert.deepEqual(
+              swagger.validateRequest(compiledPath, 'get', { numberLimit: 5 }),
+              [],
+            );
+            assert.deepEqual(
               swagger.validateRequest(compiledPath, 'get', {
                 numberLimit: 5.5,
               }),
-              []
+              [],
             );
-            assert.deepStrictEqual(swagger.validateRequest(compiledPath, 'get', { limit: '5' }), []);
-            assert.deepStrictEqual(
+            assert.deepEqual(
+              swagger.validateRequest(compiledPath, 'get', { limit: '5' }),
+              [],
+            );
+            assert.deepEqual(
               swagger.validateRequest(compiledPath, 'get', {
                 numberLimit: '5',
               }),
-              []
+              [],
             );
           });
 
           it('booleanLimit must be a boolean', () => {
-            assert.deepStrictEqual(
+            assert.deepEqual(
               [
                 {
                   actual: 'hello',
@@ -243,10 +280,10 @@ describe('swagger2', () => {
               ],
               swagger.validateRequest(compiledPath, 'get', {
                 booleanLimit: 'hello',
-              })
+              }),
             );
 
-            assert.deepStrictEqual(
+            assert.deepEqual(
               [
                 {
                   actual: '0',
@@ -256,37 +293,37 @@ describe('swagger2', () => {
               ],
               swagger.validateRequest(compiledPath, 'get', {
                 booleanLimit: '0',
-              })
+              }),
             );
 
-            assert.deepStrictEqual(
+            assert.deepEqual(
               swagger.validateRequest(compiledPath, 'get', {
                 booleanLimit: true,
               }),
-              []
+              [],
             );
-            assert.deepStrictEqual(
+            assert.deepEqual(
               swagger.validateRequest(compiledPath, 'get', {
                 booleanLimit: false,
               }),
-              []
+              [],
             );
-            assert.deepStrictEqual(
+            assert.deepEqual(
               swagger.validateRequest(compiledPath, 'get', {
                 booleanLimit: 'true',
               }),
-              []
+              [],
             );
-            assert.deepStrictEqual(
+            assert.deepEqual(
               swagger.validateRequest(compiledPath, 'get', {
                 booleanLimit: 'false',
               }),
-              []
+              [],
             );
           });
 
           it('body must be empty', () => {
-            assert.deepStrictEqual(
+            assert.deepEqual(
               [
                 {
                   actual: { x: 'hello' },
@@ -296,15 +333,19 @@ describe('swagger2', () => {
               ],
               swagger.validateRequest(compiledPath, 'get', undefined, {
                 x: 'hello',
-              })
+              }),
             );
           });
 
-          it('ok with no limit', () => assert.deepStrictEqual([], swagger.validateRequest(compiledPath, 'get')));
+          it('ok with no limit', () =>
+            assert.deepEqual([], swagger.validateRequest(compiledPath, 'get')));
           it('ok with valid limit', () =>
-            assert.deepStrictEqual([], swagger.validateRequest(compiledPath, 'get', { limit: 50 })));
+            assert.deepEqual(
+              [],
+              swagger.validateRequest(compiledPath, 'get', { limit: 50 }),
+            ));
           it('invalid method response', () =>
-            assert.deepStrictEqual(
+            assert.deepEqual(
               swagger.validateResponse(compiledPath, 'get', 201, {
                 code: 'hello',
               }),
@@ -323,11 +364,11 @@ describe('swagger2', () => {
                   },
                 },
                 error: 'data.message is required',
-              }
+              },
             ));
 
           it('invalid object response', () =>
-            assert.deepStrictEqual(
+            assert.deepEqual(
               swagger.validateResponse(compiledPath, 'get', 200, {
                 bad: 'object',
               }),
@@ -347,30 +388,35 @@ describe('swagger2', () => {
                   },
                 },
                 error: 'data is the wrong type',
-              }
+              },
             ));
 
           it('invalid array response', () =>
-            assert.deepStrictEqual(swagger.validateResponse(compiledPath, 'get', 200, [{ bad: 'value' }]), {
-              actual: [{ bad: 'value' }],
-              expected: {
-                schema: {
-                  type: 'array',
-                  items: {
-                    required: ['id', 'name'],
-                    properties: {
-                      id: { type: 'integer', format: 'int64' },
-                      name: { type: 'string', minLength: 1 },
-                      tag: { type: 'string' },
+            assert.deepEqual(
+              swagger.validateResponse(compiledPath, 'get', 200, [
+                { bad: 'value' },
+              ]),
+              {
+                actual: [{ bad: 'value' }],
+                expected: {
+                  schema: {
+                    type: 'array',
+                    items: {
+                      required: ['id', 'name'],
+                      properties: {
+                        id: { type: 'integer', format: 'int64' },
+                        name: { type: 'string', minLength: 1 },
+                        tag: { type: 'string' },
+                      },
                     },
                   },
                 },
+                error: 'data.0.id is required\ndata.0.name is required',
               },
-              error: 'data.0.id is required\ndata.0.name is required',
-            }));
+            ));
 
           it('invalid pet object response', () =>
-            assert.deepStrictEqual(
+            assert.deepEqual(
               swagger.validateResponse(compiledPath, 'get', 200, [
                 {
                   id: 'abc',
@@ -396,50 +442,62 @@ describe('swagger2', () => {
                   },
                 },
                 error: 'data.0.id is the wrong type',
-              }
+              },
             ));
 
           it('valid error response', () =>
-            assert.deepStrictEqual(
+            assert.deepEqual(
               swagger.validateResponse(compiledPath, 'get', 400, {
                 code: 32,
                 message: 'message',
               }),
-              undefined
+              undefined,
             ));
 
           it('valid empty array response', () =>
-            assert.deepStrictEqual(swagger.validateResponse(compiledPath, 'get', 200, []), undefined));
+            assert.deepEqual(
+              swagger.validateResponse(compiledPath, 'get', 200, []),
+              undefined,
+            ));
           it('valid array response', () =>
-            assert.deepStrictEqual(
+            assert.deepEqual(
               swagger.validateResponse(compiledPath, 'get', 200, [
                 {
                   id: 3,
                   name: 'hello',
                 },
               ]),
-              undefined
+              undefined,
             ));
         });
       });
 
       describe('/v1/pets/{petId}', () => {
         it('do not allow POSTs, PUTs or DELETE', () => {
-          assert.deepStrictEqual(swagger.validateRequest(compiled('/v1/pets/3'), 'post', {}, {}), undefined);
-          assert.deepStrictEqual(swagger.validateRequest(compiled('/v1/pets/3'), 'put', {}, {}), undefined);
-          assert.deepStrictEqual(swagger.validateRequest(compiled('/v1/pets/3'), 'delete', {}, {}), undefined);
+          assert.deepEqual(
+            swagger.validateRequest(compiled('/v1/pets/3'), 'post', {}, {}),
+            undefined,
+          );
+          assert.deepEqual(
+            swagger.validateRequest(compiled('/v1/pets/3'), 'put', {}, {}),
+            undefined,
+          );
+          assert.deepEqual(
+            swagger.validateRequest(compiled('/v1/pets/3'), 'delete', {}, {}),
+            undefined,
+          );
         });
 
         describe('get', () => {
           it('petId must return 400 if optional header has wrong format', () => {
-            assert.deepStrictEqual(
+            assert.deepEqual(
               swagger.validateRequest(
                 compiled('/v1/pets/123'),
                 'get',
                 { String: 'hello' },
                 undefined,
                 { 'If-Match': 'XYZ', 'If-None-Match': 'NOT NUMBER' },
-                { petId: '123' }
+                { petId: '123' },
               ),
               [
                 {
@@ -447,40 +505,48 @@ describe('swagger2', () => {
                   expected: { type: 'number' },
                   where: 'header',
                 },
-              ]
+              ],
             );
           });
           it('petId must return 400 if required header missing', () => {
-            assert.deepStrictEqual(
-              swagger.validateRequest(compiled('/v1/pets/123'), 'get', { String: 'hello' }, undefined, undefined),
+            assert.deepEqual(
+              swagger.validateRequest(compiled('/v1/pets/123'), 'get', {
+                String: 'hello',
+              }),
               [
                 {
                   actual: undefined,
                   expected: { type: 'string' },
                   where: 'header',
                 },
-              ]
+              ],
             );
           });
           it('petId must return an array of pet objects', () => {
-            assert.deepStrictEqual(
+            assert.deepEqual(
               [],
-              swagger.validateRequest(compiled('/v1/pets/123'), 'get', { String: 'hello' }, undefined, {
-                'If-Match': 'XYZ',
-              })
+              swagger.validateRequest(
+                compiled('/v1/pets/123'),
+                'get',
+                { String: 'hello' },
+                undefined,
+                {
+                  'If-Match': 'XYZ',
+                },
+              ),
             );
-            assert.deepStrictEqual(
+            assert.deepEqual(
               swagger.validateResponse(compiled('/v1/pets/123'), 'get', 200, [
                 {
                   id: 3,
                   name: 'hello',
                 },
               ]),
-              undefined
+              undefined,
             );
           });
           it('petId must accept a required array of strings in query', () => {
-            assert.deepStrictEqual(
+            assert.deepEqual(
               [],
               swagger.validateRequest(
                 compiled('/v1/pets/123'),
@@ -488,10 +554,10 @@ describe('swagger2', () => {
                 { String: 'hello' },
                 undefined,
                 { 'If-Match': 'XYZ' },
-                { petId: '123' }
-              )
+                { petId: '123' },
+              ),
             );
-            assert.deepStrictEqual(
+            assert.deepEqual(
               [],
               swagger.validateRequest(
                 compiled('/v1/pets/123'),
@@ -499,10 +565,10 @@ describe('swagger2', () => {
                 { String: ['hello'] },
                 undefined,
                 { 'If-Match': 'XYZ' },
-                { petId: '123' }
-              )
+                { petId: '123' },
+              ),
             );
-            assert.deepStrictEqual(
+            assert.deepEqual(
               [],
               swagger.validateRequest(
                 compiled('/v1/pets/123'),
@@ -510,10 +576,10 @@ describe('swagger2', () => {
                 { String: ['hello', 'hello2'] },
                 undefined,
                 { 'If-Match': 'XYZ' },
-                { petId: '123' }
-              )
+                { petId: '123' },
+              ),
             );
-            assert.deepStrictEqual(
+            assert.deepEqual(
               [
                 {
                   actual: undefined,
@@ -527,53 +593,53 @@ describe('swagger2', () => {
                 undefined,
                 undefined,
                 { 'If-Match': 'XYZ' },
-                { petId: '123' }
-              )
+                { petId: '123' },
+              ),
             );
           });
 
           it('petId must accept an optional array of numbers in query', () => {
-            assert.deepStrictEqual(
+            assert.deepEqual(
               swagger.validateRequest(
                 compiled('/v1/pets/123'),
                 'get',
                 { String: 'hello', Number: 213 },
                 undefined,
                 { 'If-Match': 'XYZ' },
-                { petId: '123' }
+                { petId: '123' },
               ),
-              []
+              [],
             );
-            assert.deepStrictEqual(
+            assert.deepEqual(
               swagger.validateRequest(
                 compiled('/v1/pets/123'),
                 'get',
                 { String: 'hello', Number: '213' },
                 undefined,
                 { 'If-Match': 'XYZ' },
-                { petId: '123' }
+                { petId: '123' },
               ),
-              []
+              [],
             );
-            assert.deepStrictEqual(
+            assert.deepEqual(
               swagger.validateRequest(
                 compiled('/v1/pets/123'),
                 'get',
                 { String: 'hello', Number: '213,456' },
                 undefined,
                 { 'If-Match': 'XYZ' },
-                { petId: '123' }
+                { petId: '123' },
               ),
-              []
+              [],
             );
-            assert.deepStrictEqual(
+            assert.deepEqual(
               swagger.validateRequest(
                 compiled('/v1/pets/123'),
                 'get',
                 { String: 'hello', Number: 'hello' },
                 undefined,
                 { 'If-Match': 'XYZ' },
-                { petId: '123' }
+                { petId: '123' },
               ),
               [
                 {
@@ -581,16 +647,16 @@ describe('swagger2', () => {
                   expected: { type: 'array' },
                   where: 'query',
                 },
-              ]
+              ],
             );
-            assert.deepStrictEqual(
+            assert.deepEqual(
               swagger.validateRequest(
                 compiled('/v1/pets/123'),
                 'get',
                 { String: 'hello', Number: '123,hello' },
                 undefined,
                 { 'If-Match': 'XYZ' },
-                { petId: '123' }
+                { petId: '123' },
               ),
               [
                 {
@@ -598,52 +664,52 @@ describe('swagger2', () => {
                   expected: { type: 'array' },
                   where: 'query',
                 },
-              ]
+              ],
             );
           });
 
           it('petId must accept an optional array of booleans in query', () => {
-            assert.deepStrictEqual(
+            assert.deepEqual(
               swagger.validateRequest(
                 compiled('/v1/pets/123'),
                 'get',
                 { String: 'hello', Boolean: true },
                 undefined,
                 { 'If-Match': 'XYZ' },
-                { petId: '123' }
+                { petId: '123' },
               ),
-              []
+              [],
             );
-            assert.deepStrictEqual(
+            assert.deepEqual(
               swagger.validateRequest(
                 compiled('/v1/pets/123'),
                 'get',
                 { String: 'hello', Boolean: 'true' },
                 undefined,
                 { 'If-Match': 'XYZ' },
-                { petId: '123' }
+                { petId: '123' },
               ),
-              []
+              [],
             );
-            assert.deepStrictEqual(
+            assert.deepEqual(
               swagger.validateRequest(
                 compiled('/v1/pets/123'),
                 'get',
                 { String: 'hello', Boolean: 'false|true' },
                 undefined,
                 { 'If-Match': 'XYZ' },
-                { petId: '123' }
+                { petId: '123' },
               ),
-              []
+              [],
             );
-            assert.deepStrictEqual(
+            assert.deepEqual(
               swagger.validateRequest(
                 compiled('/v1/pets/123'),
                 'get',
                 { String: 'hello', Boolean: 'hello' },
                 undefined,
                 { 'If-Match': 'XYZ' },
-                { petId: '123' }
+                { petId: '123' },
               ),
               [
                 {
@@ -651,16 +717,16 @@ describe('swagger2', () => {
                   expected: { type: 'array' },
                   where: 'query',
                 },
-              ]
+              ],
             );
-            assert.deepStrictEqual(
+            assert.deepEqual(
               swagger.validateRequest(
                 compiled('/v1/pets/123'),
                 'get',
                 { String: 'hello', Boolean: 'true|hello' },
                 undefined,
                 { 'If-Match': 'XYZ' },
-                { petId: '123' }
+                { petId: '123' },
               ),
               [
                 {
@@ -668,41 +734,41 @@ describe('swagger2', () => {
                   expected: { type: 'array' },
                   where: 'query',
                 },
-              ]
+              ],
             );
           });
 
           it('petId must accept an optional spaced array of booleans in query', () => {
-            assert.deepStrictEqual(
+            assert.deepEqual(
               swagger.validateRequest(
                 compiled('/v1/pets/123'),
                 'get',
                 { String: 'hello', SpacedBoolean: 'true' },
                 undefined,
                 { 'If-Match': 'XYZ' },
-                { petId: '123' }
+                { petId: '123' },
               ),
-              []
+              [],
             );
-            assert.deepStrictEqual(
+            assert.deepEqual(
               swagger.validateRequest(
                 compiled('/v1/pets/123'),
                 'get',
                 { String: 'hello', SpacedBoolean: 'false true' },
                 undefined,
                 { 'If-Match': 'XYZ' },
-                { petId: '123' }
+                { petId: '123' },
               ),
-              []
+              [],
             );
-            assert.deepStrictEqual(
+            assert.deepEqual(
               swagger.validateRequest(
                 compiled('/v1/pets/123'),
                 'get',
                 { String: 'hello', SpacedBoolean: 'false abc' },
                 undefined,
                 { 'If-Match': 'XYZ' },
-                { petId: '123' }
+                { petId: '123' },
               ),
               [
                 {
@@ -710,16 +776,16 @@ describe('swagger2', () => {
                   expected: { type: 'array' },
                   where: 'query',
                 },
-              ]
+              ],
             );
-            assert.deepStrictEqual(
+            assert.deepEqual(
               swagger.validateRequest(
                 compiled('/v1/pets/123'),
                 'get',
                 { String: 'hello', SpacedBoolean: 'false,true' },
                 undefined,
                 { 'If-Match': 'XYZ' },
-                { petId: '123' }
+                { petId: '123' },
               ),
               [
                 {
@@ -727,16 +793,16 @@ describe('swagger2', () => {
                   expected: { type: 'array' },
                   where: 'query',
                 },
-              ]
+              ],
             );
-            assert.deepStrictEqual(
+            assert.deepEqual(
               swagger.validateRequest(
                 compiled('/v1/pets/123'),
                 'get',
                 { String: 'hello', SpacedBoolean: 'false\ttrue' },
                 undefined,
                 { 'If-Match': 'XYZ' },
-                { petId: '123' }
+                { petId: '123' },
               ),
               [
                 {
@@ -744,16 +810,16 @@ describe('swagger2', () => {
                   expected: { type: 'array' },
                   where: 'query',
                 },
-              ]
+              ],
             );
-            assert.deepStrictEqual(
+            assert.deepEqual(
               swagger.validateRequest(
                 compiled('/v1/pets/123'),
                 'get',
                 { String: 'hello', SpacedBoolean: 'false|true' },
                 undefined,
                 { 'If-Match': 'XYZ' },
-                { petId: '123' }
+                { petId: '123' },
               ),
               [
                 {
@@ -761,41 +827,41 @@ describe('swagger2', () => {
                   expected: { type: 'array' },
                   where: 'query',
                 },
-              ]
+              ],
             );
           });
 
           it('petId must accept an optional tabbed array of booleans in query', () => {
-            assert.deepStrictEqual(
+            assert.deepEqual(
               swagger.validateRequest(
                 compiled('/v1/pets/123'),
                 'get',
                 { String: 'hello', TabbedBoolean: 'true' },
                 undefined,
                 { 'If-Match': 'XYZ' },
-                { petId: '123' }
+                { petId: '123' },
               ),
-              []
+              [],
             );
-            assert.deepStrictEqual(
+            assert.deepEqual(
               swagger.validateRequest(
                 compiled('/v1/pets/123'),
                 'get',
                 { String: 'hello', TabbedBoolean: 'false\ttrue' },
                 undefined,
                 { 'If-Match': 'XYZ' },
-                { petId: '123' }
+                { petId: '123' },
               ),
-              []
+              [],
             );
-            assert.deepStrictEqual(
+            assert.deepEqual(
               swagger.validateRequest(
                 compiled('/v1/pets/abc'),
                 'get',
                 { String: 'hello', TabbedBoolean: 'false\tabc' },
                 undefined,
                 { 'If-Match': 'XYZ' },
-                { petId: '123' }
+                { petId: '123' },
               ),
               [
                 {
@@ -803,16 +869,16 @@ describe('swagger2', () => {
                   expected: { type: 'array' },
                   where: 'query',
                 },
-              ]
+              ],
             );
-            assert.deepStrictEqual(
+            assert.deepEqual(
               swagger.validateRequest(
                 compiled('/v1/pets/123'),
                 'get',
                 { String: 'hello', TabbedBoolean: 'false,true' },
                 undefined,
                 { 'If-Match': 'XYZ' },
-                { petId: '123' }
+                { petId: '123' },
               ),
               [
                 {
@@ -820,16 +886,16 @@ describe('swagger2', () => {
                   expected: { type: 'array' },
                   where: 'query',
                 },
-              ]
+              ],
             );
-            assert.deepStrictEqual(
+            assert.deepEqual(
               swagger.validateRequest(
                 compiled('/v1/pets/123'),
                 'get',
                 { String: 'hello', TabbedBoolean: 'false true' },
                 undefined,
                 { 'If-Match': 'XYZ' },
-                { petId: '123' }
+                { petId: '123' },
               ),
               [
                 {
@@ -837,16 +903,16 @@ describe('swagger2', () => {
                   expected: { type: 'array' },
                   where: 'query',
                 },
-              ]
+              ],
             );
-            assert.deepStrictEqual(
+            assert.deepEqual(
               swagger.validateRequest(
                 compiled('/v1/pets/123'),
                 'get',
                 { String: 'hello', TabbedBoolean: 'false|true' },
                 undefined,
                 { 'If-Match': 'XYZ' },
-                { petId: '123' }
+                { petId: '123' },
               ),
               [
                 {
@@ -854,7 +920,7 @@ describe('swagger2', () => {
                   expected: { type: 'array' },
                   where: 'query',
                 },
-              ]
+              ],
             );
           });
         });
@@ -870,17 +936,19 @@ describe('swagger2', () => {
     //   describe('/api/pets', () => {
     //     let compiledPath = compiled('/api/pets');
     //     describe('post', () => {
-    //       assert.deepStrictEqual(swagger.validateRequest(compiledPath, 'post', {}, { x: 'y' }), []);
+    //       assert.deepEqual(swagger.validateRequest(compiledPath, 'post', {}, { x: 'y' }), []);
     //     });
     //   });
     // });
 
     describe('parameters.yaml', () => {
       it('/api/pets', () => {
-        const compiledPath = compile('test/yaml/parameters.yaml')('/api/pets/abc');
+        const compiledPath = compile('test/yaml/parameters.yaml')(
+          '/api/pets/abc',
+        );
 
         // not ok
-        assert.deepStrictEqual(
+        assert.deepEqual(
           swagger.validateRequest(compiledPath, 'get', {
             Number: 1,
           }),
@@ -890,31 +958,34 @@ describe('swagger2', () => {
               expected: { type: 'string' },
               where: 'query',
             },
-          ]
+          ],
         );
 
         // ok
-        assert.deepStrictEqual(
+        assert.deepEqual(
           swagger.validateRequest(compiledPath, 'get', {
             String: 'hello',
             Number: 1,
           }),
-          []
+          [],
         );
 
         // not ok
-        assert.deepStrictEqual(
+        assert.deepEqual(
           swagger.validateRequest(compiledPath, 'put', {
             String: 'abc',
           }),
-          [{ actual: 'abc', expected: { type: 'number' }, where: 'query' }]
+          [{ actual: 'abc', expected: { type: 'number' }, where: 'query' }],
         );
 
         // ok
-        assert.deepStrictEqual(swagger.validateRequest(compiledPath, 'put', { String: 123 }), []);
+        assert.deepEqual(
+          swagger.validateRequest(compiledPath, 'put', { String: 123 }),
+          [],
+        );
 
         // ok
-        assert.deepStrictEqual(
+        assert.deepEqual(
           swagger.validateRequest(
             compiledPath,
             'patch',
@@ -922,13 +993,13 @@ describe('swagger2', () => {
               String: 'hello',
               Number: 1,
             },
-            { tag: 'dog' }
+            { tag: 'dog' },
           ),
-          []
+          [],
         );
 
         // ok
-        assert.deepStrictEqual(
+        assert.deepEqual(
           swagger.validateRequest(
             compile('test/yaml/parameters.yaml')('/api/petsByNumber/123'),
             'get',
@@ -937,13 +1008,13 @@ describe('swagger2', () => {
             undefined,
             {
               num: '123',
-            }
+            },
           ),
-          []
+          [],
         );
 
         // ok
-        assert.deepStrictEqual(
+        assert.deepEqual(
           swagger.validateRequest(
             compile('test/yaml/parameters.yaml')('/api/petsByNumber/123'),
             'get',
@@ -952,13 +1023,13 @@ describe('swagger2', () => {
             undefined,
             {
               num: 123,
-            }
+            },
           ),
-          []
+          [],
         );
 
         // not ok
-        assert.deepStrictEqual(
+        assert.deepEqual(
           swagger.validateRequest(
             compile('test/yaml/parameters.yaml')('/api/petsByNumber/abc'),
             'get',
@@ -967,13 +1038,13 @@ describe('swagger2', () => {
             undefined,
             {
               num: 'abc',
-            }
+            },
           ),
-          [{ actual: 'abc', expected: { type: 'number' }, where: 'path' }]
+          [{ actual: 'abc', expected: { type: 'number' }, where: 'path' }],
         );
 
         // ok
-        assert.deepStrictEqual(
+        assert.deepEqual(
           swagger.validateRequest(
             compile('test/yaml/parameters.yaml')('/api/petsByBoolean/true'),
             'get',
@@ -982,13 +1053,13 @@ describe('swagger2', () => {
             undefined,
             {
               bool: 'true',
-            }
+            },
           ),
-          []
+          [],
         );
 
         // ok
-        assert.deepStrictEqual(
+        assert.deepEqual(
           swagger.validateRequest(
             compile('test/yaml/parameters.yaml')('/api/petsByBoolean/false'),
             'get',
@@ -997,13 +1068,13 @@ describe('swagger2', () => {
             undefined,
             {
               bool: false,
-            }
+            },
           ),
-          []
+          [],
         );
 
         // not ok
-        assert.deepStrictEqual(
+        assert.deepEqual(
           swagger.validateRequest(
             compile('test/yaml/parameters.yaml')('/api/petsByBoolean/abc'),
             'get',
@@ -1012,13 +1083,13 @@ describe('swagger2', () => {
             undefined,
             {
               bool: 'abc',
-            }
+            },
           ),
-          [{ actual: 'abc', expected: { type: 'boolean' }, where: 'path' }]
+          [{ actual: 'abc', expected: { type: 'boolean' }, where: 'path' }],
         );
 
         // not ok
-        assert.deepStrictEqual(
+        assert.deepEqual(
           swagger.validateRequest(
             compile('test/yaml/parameters.yaml')('/api/petsByBoolean/123'),
             'get',
@@ -1027,13 +1098,13 @@ describe('swagger2', () => {
             undefined,
             {
               bool: '123',
-            }
+            },
           ),
-          [{ actual: '123', expected: { type: 'boolean' }, where: 'path' }]
+          [{ actual: '123', expected: { type: 'boolean' }, where: 'path' }],
         );
 
         // not ok
-        assert.deepStrictEqual(
+        assert.deepEqual(
           swagger.validateRequest(
             compile('test/yaml/parameters.yaml')('/api/petsByBoolean/123'),
             'get',
@@ -1042,22 +1113,26 @@ describe('swagger2', () => {
             undefined,
             {
               bool: 123,
-            }
+            },
           ),
-          [{ actual: 123, expected: { type: 'boolean' }, where: 'path' }]
+          [{ actual: 123, expected: { type: 'boolean' }, where: 'path' }],
         );
       });
     });
 
     describe('no-base-path.yaml', () => {
       it('/pets is resolved correctly with no basePath defined', () => {
-        const compiledPath = compile('test/yaml/no-base-path.yaml')('/pets/abc');
-        assert.deepStrictEqual(swagger.validateRequest(compiledPath, 'get'), []);
+        const compiledPath = compile('test/yaml/no-base-path.yaml')(
+          '/pets/abc',
+        );
+        assert.deepEqual(swagger.validateRequest(compiledPath, 'get'), []);
       });
 
       it('/pets verify an error is returned when no response or default response is defined', () => {
-        const compiledPath = compile('test/yaml/no-base-path.yaml')('/pets/abc');
-        assert.deepStrictEqual(swagger.validateResponse(compiledPath, 'get', 404), {
+        const compiledPath = compile('test/yaml/no-base-path.yaml')(
+          '/pets/abc',
+        );
+        assert.deepEqual(swagger.validateResponse(compiledPath, 'get', 404), {
           actual: undefined,
           expected: { schema: undefined },
         });
@@ -1066,18 +1141,24 @@ describe('swagger2', () => {
 
     describe('tricky-slash-path.yaml', () => {
       it('/pets is resolved correctly with basePath defined as "/"', () => {
-        const compiledPath = compile('test/yaml/tricky-slash-path.yaml')('/pets/abc');
-        assert.deepStrictEqual(swagger.validateRequest(compiledPath, 'get'), []);
+        const compiledPath = compile('test/yaml/tricky-slash-path.yaml')(
+          '/pets/abc',
+        );
+        assert.deepEqual(swagger.validateRequest(compiledPath, 'get'), []);
       });
 
       it('/pets is resolved correctly with the request path ends with a "/"', () => {
-        const compiledPath = compile('test/yaml/tricky-slash-path.yaml')('/pets/abc/');
-        assert.deepStrictEqual(swagger.validateRequest(compiledPath, 'get'), []);
+        const compiledPath = compile('test/yaml/tricky-slash-path.yaml')(
+          '/pets/abc/',
+        );
+        assert.deepEqual(swagger.validateRequest(compiledPath, 'get'), []);
       });
 
       it('/pets verifies and returns error while the request path ends with multiple "/"', () => {
-        const compiledPath = compile('test/yaml/tricky-slash-path.yaml')('/pets/abc//');
-        assert.deepStrictEqual(swagger.validateResponse(compiledPath, 'get', 404), {
+        const compiledPath = compile('test/yaml/tricky-slash-path.yaml')(
+          '/pets/abc//',
+        );
+        assert.deepEqual(swagger.validateResponse(compiledPath, 'get', 404), {
           actual: 'UNDEFINED_PATH',
           expected: 'PATH',
         });
@@ -1086,33 +1167,49 @@ describe('swagger2', () => {
 
     describe('parsed path parameter validation', () => {
       it('/api/pets/dog/short should match { breed: "dog", fur: "short" }', () => {
-        const compiledPath = compile('test/yaml/parameters.yaml')('/api/pets/dog/short');
-        assert.deepStrictEqual(
-          swagger.validateRequest(compiledPath, 'get', undefined, undefined, undefined, {
-            breed: 'dog',
-            fur: 'short',
-          }),
-          []
+        const compiledPath = compile('test/yaml/parameters.yaml')(
+          '/api/pets/dog/short',
+        );
+        assert.deepEqual(
+          swagger.validateRequest(
+            compiledPath,
+            'get',
+            undefined,
+            undefined,
+            undefined,
+            {
+              breed: 'dog',
+              fur: 'short',
+            },
+          ),
+          [],
         );
       });
 
       it('/api/pets/dog/short should not match { breed: "dog" }', () => {
-        const compiledPath = compile('test/yaml/parameters.yaml')('/api/pets/dog/short');
-        assert.deepStrictEqual(
-          swagger.validateRequest(compiledPath, 'get', undefined, undefined, undefined, {
-            breed: 'dog',
-          }),
+        const compiledPath = compile('test/yaml/parameters.yaml')(
+          '/api/pets/dog/short',
+        );
+        assert.deepEqual(
+          swagger.validateRequest(
+            compiledPath,
+            'get',
+            undefined,
+            undefined,
+            undefined,
+            {
+              breed: 'dog',
+            },
+          ),
           [
             {
               actual: undefined,
               expected: { type: 'string' },
               where: 'path',
             },
-          ]
+          ],
         );
       });
     });
   });
 });
-
-/* eslint-enable no-sync */

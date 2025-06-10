@@ -3,7 +3,7 @@
 /*
  The MIT License
 
- Copyright (c) 2014-2022 Carl Ansley
+ Copyright (c) 2014-2025 Carl Ansley
 
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the 'Software'), to deal
@@ -26,12 +26,12 @@
 
 /* eslint-disable camelcase */
 
-import * as assert from 'node:assert';
+import { strict as assert } from 'node:assert';
+import path from 'node:path';
+import { describe, it } from 'node:test';
 
-import * as document from './document';
-import type * as schema from './schema';
-
-/* tslint:disable:max-line-length */
+import * as document from './document.ts';
+import * as schema from './schema.ts';
 
 const MINIMAL_SWAGGER_DOCUMENT: schema.Document = {
   swagger: '2.0',
@@ -355,7 +355,10 @@ const PETSTORE_SEPARATE_DOCUMENT: schema.Document = {
         description:
           'Returns all pets from the system that the user has access to\nNam sed condimentum est. Maecenas tempor sagittis sapien, nec rhoncus sem sagittis sit amet. Aenean at gravida augue, ac iaculis sem. Curabitur odio lorem, ornare eget elementum nec, cursus id lectus. Duis mi turpis, pulvinar ac eros ac, tincidunt varius justo. In hac habitasse platea dictumst. Integer at adipiscing ante, a sagittis ligula. Aenean pharetra tempor ante molestie imperdiet. Vivamus id aliquam diam. Cras quis velit non tortor eleifend sagittis. Praesent at enim pharetra urna volutpat venenatis eget eget mauris. In eleifend fermentum facilisis. Praesent enim enim, gravida ac sodales sed, placerat id erat. Suspendisse lacus dolor, consectetur non augue vel, vehicula interdum libero. Morbi euismod sagittis libero sed lacinia.\n\nSed tempus felis lobortis leo pulvinar rutrum. Nam mattis velit nisl, eu condimentum ligula luctus nec. Phasellus semper velit eget aliquet faucibus. In a mattis elit. Phasellus vel urna viverra, condimentum lorem id, rhoncus nibh. Ut pellentesque posuere elementum. Sed a varius odio. Morbi rhoncus ligula libero, vel eleifend nunc tristique vitae. Fusce et sem dui. Aenean nec scelerisque tortor. Fusce malesuada accumsan magna vel tempus. Quisque mollis felis eu dolor tristique, sit amet auctor felis gravida. Sed libero lorem, molestie sed nisl in, accumsan tempor nisi. Fusce sollicitudin massa ut lacinia mattis. Sed vel eleifend lorem. Pellentesque vitae felis pretium, pulvinar elit eu, euismod sapien.\n',
         operationId: 'findPets',
-        parameters: [{ $ref: 'parameters.yaml#/tagsParam' }, { $ref: 'parameters.yaml#/limitsParam' }],
+        parameters: [
+          { $ref: 'parameters.yaml#/tagsParam' },
+          { $ref: 'parameters.yaml#/limitsParam' },
+        ],
         responses: {
           200: {
             description: 'pet response',
@@ -390,7 +393,8 @@ const PETSTORE_SEPARATE_DOCUMENT: schema.Document = {
     },
     '/pets/{id}': {
       get: {
-        description: 'Returns a user based on a single ID, if the user does not have access to the pet',
+        description:
+          'Returns a user based on a single ID, if the user does not have access to the pet',
         operationId: 'find pet by id',
         parameters: [
           {
@@ -520,7 +524,8 @@ const PETSTORE_EXPANDED_DOCUMENT: schema.Document = {
     },
     '/pets/{id}': {
       get: {
-        description: 'Returns a user based on a single ID, if the user does not have access to the pet',
+        description:
+          'Returns a user based on a single ID, if the user does not have access to the pet',
         operationId: 'find pet by id',
         parameters: [
           {
@@ -724,13 +729,15 @@ const UBER_DOCUMENT: schema.Document = {
             in: 'query',
             type: 'string',
             format: 'uuid',
-            description: 'Unique customer identifier to be used for experience customization.',
+            description:
+              'Unique customer identifier to be used for experience customization.',
           },
           {
             name: 'product_id',
             in: 'query',
             type: 'string',
-            description: 'Unique identifier representing a specific product for a given latitude & longitude.',
+            description:
+              'Unique identifier representing a specific product for a given latitude & longitude.',
           },
         ],
         tags: ['Estimates'],
@@ -775,14 +782,16 @@ const UBER_DOCUMENT: schema.Document = {
             in: 'query',
             type: 'integer',
             format: 'int32',
-            description: 'Offset the list of returned results by this amount. Default is zero.',
+            description:
+              'Offset the list of returned results by this amount. Default is zero.',
           },
           {
             name: 'limit',
             in: 'query',
             type: 'integer',
             format: 'int32',
-            description: 'Number of items to retrieve. Default is 5, maximum is 100.',
+            description:
+              'Number of items to retrieve. Default is 5, maximum is 100.',
           },
         ],
         tags: ['User'],
@@ -840,7 +849,8 @@ const UBER_DOCUMENT: schema.Document = {
         },
         currency_code: {
           type: 'string',
-          description: '[ISO 4217](http://en.wikipedia.org/wiki/ISO_4217) currency code.',
+          description:
+            '[ISO 4217](http://en.wikipedia.org/wiki/ISO_4217) currency code.',
         },
         display_name: {
           type: 'string',
@@ -925,11 +935,10 @@ const UBER_DOCUMENT: schema.Document = {
   },
 };
 
-// eslint-disable-next-line unicorn/prefer-module
-const TEST_YAML_DIR = `${__dirname}/../test/yaml/`;
+const TEST_YAML_DIR = path.join(`./test/yaml/`);
 
 function load(name: string) {
-  // eslint-disable-next-line no-sync
+  // eslint-disable-next-line n/no-sync
   return document.loadDocumentSync(TEST_YAML_DIR + name);
 }
 
@@ -939,30 +948,37 @@ function validate(raw: any): schema.Document | undefined {
 }
 
 function ok(expected: schema.Document, name: string) {
-  return assert.deepStrictEqual(validate(load(name)), expected);
+  return assert.deepEqual(validate(load(name)), expected);
 }
 
 describe('document', () => {
   describe('loadDocumentSync', () => {
-    it('does not load invalid YAML', () => assert.throws(() => load('petstore-invalid.yaml')));
+    it('does not load invalid YAML', () =>
+      // eslint-disable-next-line @checkdigit/require-assert-predicate-rejects-throws
+      assert.throws(() => load('petstore-invalid.yaml')));
     it('load valid YAML', () => assert.ok(load('petstore.yaml')));
   });
 
   describe('validateDocument', () => {
-    it('fail validation on empty object', (done) => {
-      assert.deepStrictEqual(document.validateDocument({}), undefined);
-      done();
+    it('fail validation on empty object', () => {
+      assert.deepEqual(document.validateDocument({}), {});
     });
 
     it('succeed validation on minimal Swagger v2.0 documents', () => {
-      assert.deepStrictEqual(document.validateDocument(MINIMAL_SWAGGER_DOCUMENT), MINIMAL_SWAGGER_DOCUMENT);
+      assert.deepEqual(
+        document.validateDocument(MINIMAL_SWAGGER_DOCUMENT),
+        MINIMAL_SWAGGER_DOCUMENT,
+      );
     });
 
-    it('succeeds validation on petstore', () => ok(PETSTORE_DOCUMENT, 'petstore.yaml'));
+    it('succeeds validation on petstore', () =>
+      ok(PETSTORE_DOCUMENT, 'petstore.yaml'));
     it('succeeds validation on petstore-separate', () =>
       ok(PETSTORE_SEPARATE_DOCUMENT, 'petstore-separate/spec/swagger.yaml'));
-    it('succeed validation on api-with-examples', () => ok(API_WITH_EXAMPLES_DOCUMENT, 'api-with-examples.yaml'));
-    it('succeed validation on petstore-expanded', () => ok(PETSTORE_EXPANDED_DOCUMENT, 'petstore-expanded.yaml'));
+    it('succeed validation on api-with-examples', () =>
+      ok(API_WITH_EXAMPLES_DOCUMENT, 'api-with-examples.yaml'));
+    it('succeed validation on petstore-expanded', () =>
+      ok(PETSTORE_EXPANDED_DOCUMENT, 'petstore-expanded.yaml'));
     it('succeed validation on uber', () => ok(UBER_DOCUMENT, 'uber.yaml'));
 
     // eslint-disable-next-line no-warning-comments
