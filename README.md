@@ -8,7 +8,7 @@ Loading, parsing and validating requests to HTTP services based on Swagger v2.0 
   of Swagger 2.0 operations at run-time.
 - Typed. swagger2 is implemented in TypeScript, including a fully annotated TypeScript definition of
   the Swagger 2.0 document object. Makes working with Swagger objects more pleasant in the IDE of your
-  choosing (WebStorm, Atom, etc).
+  choosing (WebStorm, Atom, etc.).
 
 ## Installation
 
@@ -20,7 +20,7 @@ $ npm add swagger2
 
 Basic loading and validation of swagger 2.0 document:
 
-```
+```typescript
 import * as swagger from 'swagger2';
 
 // load YAML swagger file
@@ -35,22 +35,19 @@ if (!swagger.validateDocument(document)) {
 You can compile the document for fast validation of operation requests and responses within
 the framework of your choosing. Koa 2 example:
 
-```
+```typescript
 let app = new Koa();
 
-...
+//...
 app.use(body());
 app.use(createKoaMiddleware(document));
-...
-
+//...
 
 function createKoaMiddleware(document: swagger.Document) {
-
   // construct a validation object, pre-compiling all schema and regex required
   let compiled = swagger.compileDocument(document);
 
-  return async(context, next) => {
-
+  return async (context, next) => {
     if (!context.path.startsWith(document.basePath)) {
       // not a path that we care about
       await next();
@@ -65,8 +62,12 @@ function createKoaMiddleware(document: swagger.Document) {
     }
 
     // check the request matches the swagger schema
-    let validationErrors = swagger.validateRequest(compiledPath,
-      context.method, context.request.query, context.request.body);
+    let validationErrors = swagger.validateRequest(
+      compiledPath,
+      context.method,
+      context.request.query,
+      context.request.body,
+    );
     if (validationErrors === undefined) {
       // operation not defined, return 405 (method not allowed)
       context.status = 405;
@@ -77,7 +78,7 @@ function createKoaMiddleware(document: swagger.Document) {
       context.status = 400;
       context.body = {
         code: 'SWAGGER_REQUEST_VALIDATION_FAILED',
-        errors: validationErrors
+        errors: validationErrors,
       };
       return;
     }
@@ -86,19 +87,22 @@ function createKoaMiddleware(document: swagger.Document) {
     await next();
 
     // check the response matches the swagger schema
-    let error = swagger.validateResponse(compiledPath, context.method, context.status, context.body);
+    let error = swagger.validateResponse(
+      compiledPath,
+      context.method,
+      context.status,
+      context.body,
+    );
     if (error) {
       error.where = 'response';
       context.status = 500;
       context.body = {
         code: 'SWAGGER_RESPONSE_VALIDATION_FAILED',
-        errors: [error]
+        errors: [error],
       };
     }
   };
 }
-
-
 ```
 
 There is a complete implementation of this example/use-case in the <a href="https://github.com/carlansley/swagger2-koa">swagger2-koa</a> module,
@@ -109,7 +113,8 @@ so if you're using Koa 2 it may make sense to use that instead of swagger2 direc
 - currently only supports synchronous loading of full documents (via swagger.loadDocumentSync)
 - does not support validation of file attachments
 - does not support validation of mime-types
-- requires node v16.0 or above
+- requires node v22.0 or above
+- is now ESM
 
 ## Development
 
@@ -122,7 +127,7 @@ $ npm install
 $ npm test
 ```
 
-To see code coverage in a web-browser:
+To see code coverage in a web browser:
 
 ```shell
 $ npm run ci:coverage

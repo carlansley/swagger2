@@ -7,7 +7,7 @@
 /*
  The MIT License
 
- Copyright (c) 2014-2022 Carl Ansley
+ Copyright (c) 2014-2025 Carl Ansley
 
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -28,10 +28,16 @@
  THE SOFTWARE.
  */
 
-import { default as jsonValidator } from 'is-my-json-valid';
+import jsonValidator from 'is-my-json-valid';
 import deref from 'json-schema-deref-sync';
 
-import type { CollectionFormat, Definition, Document, Parameter, PathItem } from './schema';
+import type {
+  CollectionFormat,
+  Definition,
+  Document,
+  Parameter,
+  PathItem,
+} from './schema.ts';
 
 export interface CompiledDefinition extends Definition {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -63,6 +69,7 @@ function stringValidator(schema: Record<string, unknown>) {
   return (inputValue: unknown) => {
     // if an optional field is not provided, we're all good other not so much
     if (inputValue === undefined) {
+      // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
       return !schema['required'];
     }
 
@@ -89,22 +96,26 @@ function stringValidator(schema: Record<string, unknown>) {
 
       case 'array': {
         if (!Array.isArray(value)) {
-          const format = schema['collectionFormat'] ?? ('csv' as CollectionFormat);
-          // eslint-disable-next-line sonarjs/no-nested-switch
+          const format =
+            schema['collectionFormat'] ?? ('csv' as CollectionFormat);
           switch (format) {
             case 'csv': {
+              // eslint-disable-next-line @typescript-eslint/no-base-to-string
               value = String(value).split(',');
               break;
             }
             case 'ssv': {
+              // eslint-disable-next-line @typescript-eslint/no-base-to-string
               value = String(value).split(' ');
               break;
             }
             case 'tsv': {
+              // eslint-disable-next-line @typescript-eslint/no-base-to-string
               value = String(value).split('\t');
               break;
             }
             case 'pipes': {
+              // eslint-disable-next-line @typescript-eslint/no-base-to-string
               value = String(value).split('|');
               break;
             }
@@ -115,7 +126,6 @@ function stringValidator(schema: Record<string, unknown>) {
             }
           }
         }
-        // eslint-disable-next-line sonarjs/no-nested-switch
         switch ((schema['items'] as { type: string }).type) {
           case 'number':
           case 'integer': {
@@ -152,7 +162,6 @@ function stringValidator(schema: Record<string, unknown>) {
   };
 }
 
-// eslint-disable-next-line sonarjs/cognitive-complexity
 export function compile(document: Document): Compiled {
   // get the de-referenced version of the swagger document
   const swagger = deref(document) as Document;
@@ -161,13 +170,18 @@ export function compile(document: Document): Compiled {
   for (const pathName of Object.keys(swagger.paths)) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const path = swagger.paths[pathName] as Record<string, any>;
-    for (const operationName of Object.keys(path).filter((name) => name !== 'parameters')) {
+    for (const operationName of Object.keys(path).filter(
+      (name) => name !== 'parameters',
+    )) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const operation = path[operationName];
 
       const parameters: Record<string, unknown> = {};
-      // eslint-disable-next-line unicorn/consistent-function-scoping
-      const resolveParameter = (parameter: { name: string; location: string }) => {
+      const resolveParameter = (parameter: {
+        name: string;
+        location: string;
+        // eslint-disable-next-line unicorn/consistent-function-scoping
+      }) => {
         parameters[`${parameter.name}:${parameter.location}`] = parameter;
       };
 
@@ -181,14 +195,20 @@ export function compile(document: Document): Compiled {
 
       // create array of fully resolved parameters for operation
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      operation.resolvedParameters = Object.keys(parameters).map((key) => parameters[key]);
+      operation.resolvedParameters = Object.keys(parameters).map(
+        (key) => parameters[key],
+      );
 
       // create parameter validators
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,unicorn/no-array-for-each
       operation.resolvedParameters.forEach((parameter: CompiledParameter) => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const schema = parameter.schema ?? parameter;
-        if (parameter.in === 'query' || parameter.in === 'header' || parameter.in === 'path') {
+        if (
+          parameter.in === 'query' ||
+          parameter.in === 'header' ||
+          parameter.in === 'path'
+        ) {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
           parameter.validator = stringValidator(schema);
         } else {
@@ -200,14 +220,15 @@ export function compile(document: Document): Compiled {
       for (const statusCode of Object.keys(operation.responses)) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
         const response = operation.responses[statusCode];
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/strict-boolean-expressions
         if (response.schema) {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           response.validator = jsonValidator(response.schema);
         } else {
           // no schema, so ensure there is no response
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          response.validator = (body: unknown) => body === undefined || body === null || body === '';
+          response.validator = (body: unknown) =>
+            body === undefined || body === null || body === '';
         }
       }
     }
@@ -216,9 +237,13 @@ export function compile(document: Document): Compiled {
   const basePath = swagger.basePath ?? '';
   const matcher: CompiledPath[] = Object.keys(swagger.paths).map((name) => ({
     name,
+    // eslint-disable-next-line @typescript-eslint/non-nullable-type-assertion-style
     path: swagger.paths[name] as PathItem,
     // eslint-disable-next-line require-unicode-regexp
-    regex: new RegExp(`^${basePath.replace(/\/*$/, '')}${name.replace(/{[^}]*}/g, '[^/]+')}/?$`),
+    regex: new RegExp(
+      // eslint-disable-next-line require-unicode-regexp,sonarjs/slow-regex,unicorn/prefer-string-replace-all
+      `^${basePath.replace(/\/*$/, '')}${name.replace(/{[^}]*}/g, '[^/]+')}/?$`,
+    ),
     // eslint-disable-next-line require-unicode-regexp,id-length
     expected: (name.match(/[^/]+/g) ?? []).map((s) => s.toString()),
   }));

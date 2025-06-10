@@ -21,7 +21,7 @@
 /*
  The MIT License
 
- Copyright (c) 2014-2022 Carl Ansley
+ Copyright (c) 2014-2025 Carl Ansley
 
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -46,7 +46,14 @@
  Allows extensions to the Swagger Schema. The field name MUST begin with x-, for example, x-internal-id.
  The value can be null, a primitive, an array or an object.
  */
-export type Extension = null | number | boolean | string | object | Array<Extension>;
+export type Extension =
+  | null
+  | number
+  | boolean
+  | string
+  | object
+  // eslint-disable-next-line @typescript-eslint/array-type
+  | Array<Extension>;
 
 export type ParameterType = 'query' | 'path' | 'body' | 'header' | 'formData';
 
@@ -111,6 +118,7 @@ export interface Info {
  An object to hold data types that can be consumed and produced by operations.
  These data types can be primitives, arrays or models.
  */
+// eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style
 export interface Definitions {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [name: string]: any; // A single definition, mapping a "name" to the schema it defines.
@@ -121,6 +129,7 @@ export interface Definitions {
  Parameter definitions can be referenced to the ones defined here.
  This does not define global operation parameters.
  */
+// eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style
 export interface ParametersDefinitions {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [name: string]: any; // A single parameter definition, mapping a "name" to the parameter it defines.
@@ -131,6 +140,7 @@ export interface ParametersDefinitions {
  Response definitions can be referenced to the ones defined here.
  This does not define global operation responses.
  */
+// eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style
 export interface ResponsesDefinitions {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [name: string]: any; // A single response definition, mapping a "name" to the response it defines.
@@ -141,6 +151,7 @@ export interface ResponsesDefinitions {
  This does not enforce the security schemes on the operations and only serves to provide
  the relevant details for each scheme.
  */
+// eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style
 export interface SecurityDefinitions {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [name: string]: any; // A single security scheme definition, mapping a "name" to the scheme it defines.
@@ -153,6 +164,7 @@ export interface SecurityDefinitions {
 
  The name used for each property MUST correspond to a security scheme declared in the Security Definitions.
  */
+// eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style
 export interface SecurityRequirement {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [name: string]: any; // Each name must correspond to a security scheme which is declared in the Security Definitions.
@@ -211,6 +223,7 @@ export interface Operation {
   tags?: string[];
   produces?: string[];
   parameters?: Parameter[];
+  // eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style
   responses: { [statusCode: string]: Response };
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   security?: any;
@@ -237,6 +250,7 @@ export interface PathItem {
  Holds the relative paths to the individual endpoints. The path is appended to the basePath in order to construct the
  full URL. The Paths may be empty, due to ACL constraints.
  */
+// eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style
 export interface Paths {
   /*
    A relative path to an individual endpoint. The field name MUST begin with a slash. The path is appended to the

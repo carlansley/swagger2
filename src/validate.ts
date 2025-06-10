@@ -28,7 +28,7 @@
  THE SOFTWARE.
  */
 
-import type { CompiledDefinition, CompiledPath } from './compiler';
+import type { CompiledDefinition, CompiledPath } from './compiler.ts';
 
 export interface ValidationError {
   where?: string;
@@ -42,11 +42,19 @@ export interface ValidationError {
 }
 
 function isEmpty(value: unknown) {
-  return value === undefined || value === '' || (value instanceof Object && Object.keys(value).length === 0);
+  return (
+    value === undefined ||
+    value === '' ||
+    (value instanceof Object && Object.keys(value).length === 0)
+  );
 }
 
-function validate(value: unknown, schema: CompiledDefinition): ValidationError | undefined {
+function validate(
+  value: unknown,
+  schema: CompiledDefinition,
+): ValidationError | undefined {
   // if no schema, treat as an error
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (schema === undefined) {
     return {
       actual: value,
@@ -71,6 +79,7 @@ function validate(value: unknown, schema: CompiledDefinition): ValidationError |
   };
   // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
   const errorDetail = (schema.validator as any).error;
+  // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
   if (errorDetail) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     error.error = errorDetail;
@@ -99,7 +108,6 @@ function validate(value: unknown, schema: CompiledDefinition): ValidationError |
   return error;
 }
 
-// eslint-disable-next-line sonarjs/cognitive-complexity
 export function request(
   compiledPath: CompiledPath | undefined,
   method: string,
@@ -109,8 +117,8 @@ export function request(
   body?: any,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types
   headers?: any,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  pathParameters?: { [name: string]: any }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/consistent-indexed-object-style
+  pathParameters?: { [name: string]: any },
 ): ValidationError[] | undefined {
   if (compiledPath === undefined) {
     return;
@@ -163,7 +171,7 @@ export function request(
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     switch (parameter.in) {
       case 'query': {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment,@typescript-eslint/prefer-optional-chain
         value = (query ?? {})[parameter.name];
         break;
       }
@@ -174,8 +182,10 @@ export function request(
         } else {
           // eslint-disable-next-line require-unicode-regexp
           const actual = (compiledPath.requestPath ?? '').match(/[^/]+/g);
-          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions,@typescript-eslint/no-unsafe-member-access
-          const valueIndex = compiledPath.expected.indexOf(`{${parameter.name}}`);
+          const valueIndex = compiledPath.expected.indexOf(
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            `{${parameter.name}}`,
+          );
           value = actual ? actual[valueIndex] : undefined;
         }
         break;
@@ -187,12 +197,12 @@ export function request(
         break;
       }
       case 'header': {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment,@typescript-eslint/prefer-optional-chain
         value = (headers ?? {})[parameter.name];
         break;
       }
       case 'formData': {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment,@typescript-eslint/prefer-optional-chain
         value = (body ?? {})[parameter.name];
         bodyDefined = true;
         break;
@@ -211,6 +221,7 @@ export function request(
   });
 
   // ensure body is undefined if no body schema is defined
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (!bodyDefined && body !== undefined) {
     const error = validate(body, { validator: isEmpty });
     if (error !== undefined) {
@@ -226,7 +237,7 @@ export function response(
   compiledPath: CompiledPath | undefined,
   method: string,
   status: number,
-  body?: unknown
+  body?: unknown,
 ): ValidationError | undefined {
   if (compiledPath === undefined) {
     return {

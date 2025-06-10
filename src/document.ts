@@ -7,7 +7,7 @@
 /*
  The MIT License
 
- Copyright (c) 2014-2022 Carl Ansley
+ Copyright (c) 2014-2025 Carl Ansley
 
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -32,19 +32,20 @@ import fs from 'node:fs';
 import jsonValidator from 'is-my-json-valid';
 import * as yaml from 'js-yaml';
 
-import type { Document } from './schema';
-import * as schema from './schema.json';
+import type { Document } from './schema.ts';
+import schema from './schema.json' with { type: 'json' };
 
+// eslint-disable-next-line @checkdigit/no-side-effects
 let schemaValidator: ReturnType<typeof jsonValidator> | undefined;
 
 /*
  * Validate a swagger document against the 2.0 schema, returning a typed Document object.
  */
 export function validateDocument(document: unknown): Document | undefined {
-  if (schemaValidator === undefined) {
-    // build a swagger validator from the official v2.0 schema
-    schemaValidator = jsonValidator(schema as Parameters<typeof jsonValidator>[0]);
-  }
+  // build a swagger validator from the official v2.0 schema
+  schemaValidator ??= jsonValidator(
+    schema as Parameters<typeof jsonValidator>[0],
+  );
   if (!schemaValidator(document)) {
     return;
   }
@@ -55,6 +56,6 @@ export function validateDocument(document: unknown): Document | undefined {
  * Load a swagger document.  We only support YAML for now.
  */
 export function loadDocumentSync(file: string): unknown {
-  // eslint-disable-next-line no-sync
+  // eslint-disable-next-line n/no-sync
   return yaml.load(fs.readFileSync(file, 'utf8'));
 }
