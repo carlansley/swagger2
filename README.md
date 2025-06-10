@@ -114,6 +114,7 @@ so if you're using Koa 2 it may make sense to use that instead of swagger2 direc
 - does not support validation of file attachments
 - does not support validation of mime-types
 - requires node v22.0 or above
+- is now ESM
 
 ## Development
 
